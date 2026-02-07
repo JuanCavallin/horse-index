@@ -1,17 +1,40 @@
-version: '3.8'
 services:
   db:
-    image: postgres:15
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-horse_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-horse_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-horse_db}
-    volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      POSTGRES_USER: ${POSTGRES_USER:-horse_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-horse_index}
     ports:
-      - ${POSTGRES_PORT:-5432}:5432
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-horse_admin} -d ${POSTGRES_DB:-horse_index}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-horse_admin}:${POSTGRES_PASSWORD:-changeme_in_production}@db:5432/${POSTGRES_DB:-horse_index}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:8081,http://localhost:19006,http://localhost:3000,http://localhost}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
 
 volumes:
-  db-data:
+  pgdata:
