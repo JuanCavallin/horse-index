@@ -56,7 +56,7 @@ class MedicalRecordBase(BaseModel):
     description: str
     vet_name: str
     date: date
-    next_followup: date | None = None
+    next_followup: str | None = None
     notes: str | None = None
 
 
@@ -68,8 +68,8 @@ class MedicalRecordUpdate(BaseModel):
     record_type: RecordType | None = None
     description: str | None = None
     vet_name: str | None = None
-    date: date | None = None
-    next_followup: date | None = None
+    date: str | None = None
+    next_followup: str | None = None
     notes: str | None = None
 
 
