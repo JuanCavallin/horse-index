@@ -1,10 +1,8 @@
-from datetime import date, datetime
+import datetime as dt
 
 from pydantic import BaseModel, ConfigDict
 
 from app.models import HealthStatus, RecordType
-
-
 # --- Horse Schemas ---
 
 
@@ -16,7 +14,7 @@ class HorseBase(BaseModel):
     color: str
     photo_url: str | None = None
     health_status: HealthStatus = HealthStatus.healthy
-    arrival_date: date
+    arrival_date: dt.date
     notes: str | None = None
 
 
@@ -32,7 +30,7 @@ class HorseUpdate(BaseModel):
     color: str | None = None
     photo_url: str | None = None
     health_status: HealthStatus | None = None
-    arrival_date: date | None = None
+    arrival_date: dt.date | None = None
     notes: str | None = None
 
 
@@ -40,8 +38,8 @@ class HorseRead(HorseBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: dt.datetime
+    updated_at: dt.datetime
 
 
 class HorseReadWithRecords(HorseRead):
@@ -55,8 +53,8 @@ class MedicalRecordBase(BaseModel):
     record_type: RecordType
     description: str
     vet_name: str
-    date: date
-    next_followup: date | None = None
+    date: dt.date
+    next_followup: dt.date | None = None
     notes: str | None = None
 
 
@@ -68,8 +66,8 @@ class MedicalRecordUpdate(BaseModel):
     record_type: RecordType | None = None
     description: str | None = None
     vet_name: str | None = None
-    date: date | None = None
-    next_followup: date | None = None
+    date: dt.date | None = None
+    next_followup: dt.date | None = None
     notes: str | None = None
 
 
@@ -78,4 +76,4 @@ class MedicalRecordRead(MedicalRecordBase):
 
     id: int
     horse_id: int
-    created_at: datetime
+    created_at: dt.datetime

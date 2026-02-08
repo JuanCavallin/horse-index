@@ -7,12 +7,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-import { horsesApi } from "@/lib/api";
-import { HorseWithRecords, HealthStatus } from "@/lib/types";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { horsesApi, medicalApi } from "@/lib/api";
+import { HorseWithRecords, HealthStatus, RecordType, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
 
 const STATUS_COLORS: Record<HealthStatus, string> = {
@@ -22,22 +24,38 @@ const STATUS_COLORS: Record<HealthStatus, string> = {
   [HealthStatus.palliative]: "#9C27B0",
 };
 
+const RECORD_TYPES = Object.values(RecordType);
+
 export default function HorseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Inline medical record form state
+  const [showRecordForm, setShowRecordForm] = useState(false);
+  const [recType, setRecType] = useState<RecordType>(RecordType.checkup);
+  const [recDescription, setRecDescription] = useState("");
+  const [recVetName, setRecVetName] = useState("");
+  const [recDate, setRecDate] = useState(new Date().toISOString().split("T")[0]);
+  const [recFollowup, setRecFollowup] = useState("");
+  const [recNotes, setRecNotes] = useState("");
+  const [recSubmitting, setRecSubmitting] = useState(false);
+
+  const loadHorse = useCallback(() => {
+    if (!id) return;
+    setLoading(true);
+    horsesApi
+      .get(Number(id))
+      .then(setHorse)
+      .catch((e) => console.error(e))
+      .finally(() => setLoading(false));
+  }, [id]);
+
   useFocusEffect(
     useCallback(() => {
-      if (!id) return;
-      setLoading(true);
-      horsesApi
-        .get(Number(id))
-        .then(setHorse)
-        .catch((e) => console.error(e))
-        .finally(() => setLoading(false));
-    }, [id])
+      loadHorse();
+    }, [loadHorse])
   );
 
   const confirmDelete = () => {
@@ -54,6 +72,66 @@ export default function HorseDetailScreen() {
         { text: "Cancel", style: "cancel" },
         { text: "Delete", style: "destructive", onPress: doDelete },
       ]);
+    }
+  };
+
+  const confirmDeleteRecord = (recordId: number) => {
+    const doDelete = async () => {
+      await medicalApi.delete(recordId);
+      loadHorse();
+    };
+    if (Platform.OS === "web") {
+      if (window.confirm("Delete this medical record?")) {
+        doDelete();
+      }
+    } else {
+      Alert.alert("Delete Record", "Delete this medical record?", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: doDelete },
+      ]);
+    }
+  };
+
+  const resetRecordForm = () => {
+    setRecType(RecordType.checkup);
+    setRecDescription("");
+    setRecVetName("");
+    setRecDate(new Date().toISOString().split("T")[0]);
+    setRecFollowup("");
+    setRecNotes("");
+  };
+
+  const showAlert = (title: string, msg: string) => {
+    if (Platform.OS === "web") {
+      window.alert(`${title}: ${msg}`);
+    } else {
+      Alert.alert(title, msg);
+    }
+  };
+
+  const handleAddRecord = async () => {
+    if (!recDescription.trim() || !recVetName.trim() || !recDate.trim()) {
+      showAlert("Validation", "Please fill in description, vet name, and date.");
+      return;
+    }
+    setRecSubmitting(true);
+    try {
+      await medicalApi.create({
+        horse_id: Number(id),
+        record_type: recType,
+        description: recDescription.trim(),
+        vet_name: recVetName.trim(),
+        date: recDate,
+        next_followup: recFollowup.trim() || null,
+        notes: recNotes.trim() || null,
+      });
+      resetRecordForm();
+      setShowRecordForm(false);
+      loadHorse();
+    } catch (e: any) {
+      showAlert("Error", e.message);
+    } finally {
+      setRecSubmitting(false);
     }
   };
 
@@ -119,18 +197,99 @@ export default function HorseDetailScreen() {
       <View style={styles.medicalSection}>
         <View style={styles.medicalHeader}>
           <Text style={styles.sectionTitle}>Medical Records</Text>
-          <Pressable
-            style={styles.addRecordButton}
-            onPress={() => router.push(`/medical/${horse.id}`)}
-          >
-            <Text style={styles.addRecordText}>+ Add Record</Text>
-          </Pressable>
+          {!showRecordForm && (
+            <Pressable
+              style={styles.addRecordButton}
+              onPress={() => setShowRecordForm(true)}
+            >
+              <Text style={styles.addRecordText}>+ Add Record</Text>
+            </Pressable>
+          )}
         </View>
-        {horse.medical_records.length === 0 ? (
+
+        {showRecordForm && (
+          <View style={styles.recordFormContainer}>
+            <Text style={styles.recordFormTitle}>New Medical Record</Text>
+
+            <Text style={styles.formLabel}>Record Type</Text>
+            <View style={styles.chipRow}>
+              {RECORD_TYPES.map((t) => (
+                <Pressable
+                  key={t}
+                  style={[styles.chip, recType === t && styles.chipSelected]}
+                  onPress={() => setRecType(t)}
+                >
+                  <Text style={[styles.chipText, recType === t && styles.chipTextSelected]}>
+                    {t}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Text style={styles.formLabel}>Description *</Text>
+            <TextInput
+              style={[styles.formInput, styles.textArea]}
+              value={recDescription}
+              onChangeText={setRecDescription}
+              placeholder="What was done..."
+              multiline
+            />
+
+            <Text style={styles.formLabel}>Vet Name *</Text>
+            <TextInput style={styles.formInput} value={recVetName} onChangeText={setRecVetName} placeholder="Dr. Smith" />
+
+            <Text style={styles.formLabel}>Date (YYYY-MM-DD) *</Text>
+            <TextInput style={styles.formInput} value={recDate} onChangeText={setRecDate} placeholder="2025-06-15" />
+
+            <Text style={styles.formLabel}>Next Follow-up (YYYY-MM-DD)</Text>
+            <TextInput style={styles.formInput} value={recFollowup} onChangeText={setRecFollowup} placeholder="Optional" />
+
+            <Text style={styles.formLabel}>Notes</Text>
+            <TextInput
+              style={[styles.formInput, styles.textArea]}
+              value={recNotes}
+              onChangeText={setRecNotes}
+              placeholder="Additional notes..."
+              multiline
+            />
+
+            <View style={styles.recordFormActions}>
+              <Pressable
+                style={styles.cancelRecordButton}
+                onPress={() => {
+                  resetRecordForm();
+                  setShowRecordForm(false);
+                }}
+              >
+                <Text style={styles.cancelRecordText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.saveRecordButton, recSubmitting && styles.buttonDisabled]}
+                onPress={handleAddRecord}
+                disabled={recSubmitting}
+              >
+                <Text style={styles.saveRecordText}>
+                  {recSubmitting ? "Saving..." : "Add Record"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {horse.medical_records.length === 0 && !showRecordForm ? (
           <Text style={styles.emptyText}>No medical records yet.</Text>
         ) : (
           horse.medical_records.map((r) => (
-            <MedicalRecordCard key={r.id} record={r} />
+            <View key={r.id}>
+              <MedicalRecordCard record={r} />
+              <Pressable
+                style={styles.deleteRecordButton}
+                onPress={() => confirmDeleteRecord(r.id)}
+              >
+                <FontAwesome name="trash-o" size={14} color="#F44336" />
+                <Text style={styles.deleteRecordText}>Delete</Text>
+              </Pressable>
+            </View>
           ))
         )}
       </View>
@@ -210,4 +369,53 @@ const styles = StyleSheet.create({
   },
   addRecordText: { color: "#fff", fontWeight: "600", fontSize: 13 },
   emptyText: { fontSize: 14, color: "#999", fontStyle: "italic" },
+
+  // Delete record button
+  deleteRecordButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-end",
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginBottom: 4,
+  },
+  deleteRecordText: { fontSize: 12, color: "#F44336" },
+
+  // Inline record form
+  recordFormContainer: {
+    backgroundColor: "#f9f6f2",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#8B4513",
+  },
+  recordFormTitle: { fontSize: 16, fontWeight: "700", color: "#333", marginBottom: 4 },
+  formLabel: { fontSize: 14, fontWeight: "600", color: "#333", marginTop: 12, marginBottom: 4 },
+  formInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: "#fff",
+  },
+  textArea: { minHeight: 70, textAlignVertical: "top" },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#eee",
+  },
+  chipSelected: { backgroundColor: "#8B4513" },
+  chipText: { fontSize: 13, color: "#333" },
+  chipTextSelected: { color: "#fff" },
+  recordFormActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 16 },
+  cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#eee" },
+  cancelRecordText: { fontSize: 14, color: "#666" },
+  saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#8B4513" },
+  saveRecordText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  buttonDisabled: { opacity: 0.6 },
 });
