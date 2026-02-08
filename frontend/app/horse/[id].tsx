@@ -48,7 +48,7 @@ export default function HorseDetailScreen() {
     if (!id) return;
     setLoading(true);
     horsesApi
-      .get(Number(id))
+      .get(id)
       .then(setHorse)
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
@@ -62,7 +62,7 @@ export default function HorseDetailScreen() {
 
   const confirmDelete = () => {
     const doDelete = async () => {
-      await horsesApi.delete(Number(id));
+      await horsesApi.delete(id);
       router.replace("/");
     };
     if (Platform.OS === "web") {
@@ -77,7 +77,7 @@ export default function HorseDetailScreen() {
     }
   };
 
-  const confirmDeleteRecord = (recordId: number) => {
+  const confirmDeleteRecord = (recordId: string) => {
     const doDelete = async () => {
       await medicalApi.delete(recordId);
       loadHorse();
@@ -119,7 +119,7 @@ export default function HorseDetailScreen() {
     setRecSubmitting(true);
     try {
       await medicalApi.create({
-        horse_id: Number(id),
+        horse_id: id,
         record_type: recType,
         description: recDescription.trim(),
         vet_name: recVetName.trim(),
@@ -160,18 +160,19 @@ export default function HorseDetailScreen() {
         <View
           style={[
             styles.badge,
-            { backgroundColor: STATUS_COLORS[horse.health_status] },
+              { backgroundColor: "#9CD479" },
+            /*{ backgroundColor: STATUS_COLORS[horse.health_status] },*/
           ]}
         >
-          <Text style={styles.badgeText}>
+          {/*<Text style={styles.badgeText}>
             {horse.health_status.replace("_", " ")}
-          </Text>
+          </Text>*/}
         </View>
       </View>
 
       <View style={styles.detailGrid}>
         <DetailRow label="Breed" value={horse.breed} />
-        <DetailRow label="Age" value={`${horse.age} years`} />
+        <DetailRow label="Age" value={`${new Date().getFullYear() - horse.birth_year} years`} />
         <DetailRow label="Gender" value={horse.gender} />
         <DetailRow label="Color" value={horse.color} />
         <DetailRow label="Arrived" value={horse.arrival_date} />

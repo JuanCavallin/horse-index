@@ -46,7 +46,10 @@ router.get("/:id", async (req, res) => {
       .eq("horse_id", id)
       .order("date", { ascending: false });
 
-    if (recError) throw recError;
+    // Don't fail the whole request if medical_records table doesn't exist yet
+    if (recError) {
+      console.error("medical_records query error (non-fatal):", recError.message);
+    }
 
     res.json({ ...horse, medical_records: records ?? [] });
   } catch (err) {

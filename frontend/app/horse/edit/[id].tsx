@@ -17,7 +17,7 @@ export default function EditHorseScreen() {
       if (!id) return;
       setLoading(true);
       horsesApi
-        .get(Number(id))
+        .get(id)
         .then(setHorse)
         .catch((e) => console.error(e))
         .finally(() => setLoading(false));
@@ -26,10 +26,10 @@ export default function EditHorseScreen() {
 
   const handleSubmit = async (data: HorseFormData) => {
     const { new_medical_records, ...horseData } = data;
-    await horsesApi.update(Number(id), horseData);
+    await horsesApi.update(id, horseData);
     if (new_medical_records) {
       for (const record of new_medical_records) {
-        await medicalApi.create({ ...record, horse_id: Number(id) });
+        await medicalApi.create({ ...record, horse_id: id });
       }
     }
     router.back();
@@ -52,11 +52,11 @@ export default function EditHorseScreen() {
       initialValues={{
         name: horse.name,
         breed: horse.breed,
-        age: horse.age,
+        birth_year: horse.birth_year,
         gender: horse.gender,
         color: horse.color,
         photo_url: horse.photo_url,
-        health_status: horse.health_status,
+        //health_status: horse.health_status,
         arrival_date: horse.arrival_date,
         left_eye: horse.left_eye,
         right_eye: horse.right_eye,

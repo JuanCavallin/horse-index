@@ -30,33 +30,33 @@ export const horsesApi = {
     request<Horse[]>(
       `/horses/${healthStatus ? `?health_status=${healthStatus}` : ""}`
     ),
-  get: (id: number) => request<HorseWithRecords>(`/horses/${id}`),
+  get: (id: string) => request<HorseWithRecords>(`/horses/${id}`),
   create: (data: HorseCreate) =>
     request<Horse>("/horses/", { method: "POST", body: JSON.stringify(data) }),
-  update: (id: number, data: HorseUpdate) =>
+  update: (id: string, data: HorseUpdate) =>
     request<Horse>(`/horses/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     }),
-  delete: (id: number) =>
+  delete: (id: string) =>
     request<void>(`/horses/${id}`, { method: "DELETE" }),
 };
 
 export const medicalApi = {
-  listForHorse: (horseId: number) =>
+  listForHorse: (horseId: string) =>
     request<MedicalRecord[]>(`/medical-records/horse/${horseId}`),
-  get: (id: number) => request<MedicalRecord>(`/medical-records/${id}`),
+  get: (id: string) => request<MedicalRecord>(`/medical-records/${id}`),
   create: (data: MedicalRecordCreate) =>
     request<MedicalRecord>("/medical-records/", {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  update: (id: number, data: MedicalRecordUpdate) =>
+  update: (id: string, data: MedicalRecordUpdate) =>
     request<MedicalRecord>(`/medical-records/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     }),
-  delete: (id: number) =>
+  delete: (id: string) =>
     request<void>(`/medical-records/${id}`, { method: "DELETE" }),
 };
 
@@ -65,7 +65,7 @@ export const medicalApi = {
 //TODO: unlikely but may want to add update and delete for logs
 export const auditApi = {
   list: () => request<AuditLog[]>(`/audit_logs`),
-  get: (id: number) => request<AuditLog>(`/audit_logs/${id}`),
+  get: (id: string) => request<AuditLog>(`/audit_logs/${id}`),
   create: (data: Omit<AuditLog, "id" | "event_time">) =>
     request<AuditLog>("/audit_logs/", {
       method: "POST",

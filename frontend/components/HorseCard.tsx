@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Horse, HealthStatus } from "@/lib/types";
+import { Horse/*, HealthStatus */} from "@/lib/types";
 
+/*
 const STATUS_COLORS: Record<HealthStatus, string> = {
   [HealthStatus.healthy]: "#4CAF50",
   [HealthStatus.needs_attention]: "#FF9800",
@@ -15,7 +16,7 @@ const STATUS_LABELS: Record<HealthStatus, string> = {
   [HealthStatus.critical]: "Critical",
   [HealthStatus.palliative]: "Palliative",
 };
-
+*/
 export default function HorseCard({ horse }: { horse: Horse }) {
   const router = useRouter();
 
@@ -28,18 +29,20 @@ export default function HorseCard({ horse }: { horse: Horse }) {
         <View style={styles.info}>
           <Text style={styles.name}>{horse.name}</Text>
           <Text style={styles.detail}>
-            {horse.breed} &middot; {horse.age} yrs &middot; {horse.color}
+            {horse.breed} &middot; {new Date().getFullYear() - horse.birth_year} yrs &middot; {horse.color}
           </Text>
           <Text style={styles.detail}>Gender: {horse.gender}</Text>
         </View>
         <View
           style={[
             styles.badge,
-            { backgroundColor: STATUS_COLORS[horse.health_status] },
+            { backgroundColor: "#9CD479" },
+              /*{ backgroundColor: STATUS_COLORS[horse.health_status] },*/
           ]}
         >
           <Text style={styles.badgeText}>
-            {STATUS_LABELS[horse.health_status]}
+            {/*{STATUS_LABELS[horse.health_status]}*/}
+            Healthy
           </Text>
         </View>
       </View>
