@@ -1,10 +1,10 @@
 export default {
   light: {
     text: "#000",
-    background: "#fff",
-    tint: "#8B4513",
+    background: "#9CD479",
+    tint: "#79AED4",
     tabIconDefault: "#ccc",
-    tabIconSelected: "#8B4513",
+    tabIconSelected: "#79AED4",
     healthy: "#4CAF50",
     needs_attention: "#FF9800",
     critical: "#F44336",
@@ -12,13 +12,16 @@ export default {
   },
   dark: {
     text: "#fff",
-    background: "#000",
-    tint: "#D2A679",
+    background: "#9CD479",
+    tint: "#79AED4",
     tabIconDefault: "#666",
-    tabIconSelected: "#D2A679",
+    tabIconSelected: "#79AED4",
     healthy: "#66BB6A",
     needs_attention: "#FFB74D",
     critical: "#EF5350",
     palliative: "#BA68C8",
   },
 };
+//Pallete for company 
+//#9CD479 - green
+//#79AED4 - blue
