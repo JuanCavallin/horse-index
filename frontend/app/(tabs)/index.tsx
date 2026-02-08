@@ -24,6 +24,7 @@ export default function HorseListScreen() {
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<HealthStatus | null>(null);
+  const [pingResult, setPingResult] = useState<string>("");
 
   const loadHorses = useCallback(async () => {
     setLoading(true);
@@ -36,6 +37,17 @@ export default function HorseListScreen() {
       setLoading(false);
     }
   }, [filter]);
+
+  const testPing = async () => {
+    try {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/ping`);
+      const data = await response.json();
+      setPingResult(data.message || JSON.stringify(data));
+    } catch (e) {
+      setPingResult(`Error: ${e}`);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -62,6 +74,15 @@ export default function HorseListScreen() {
             </Text>
           </Pressable>
         ))}
+      </View>
+
+      <View style={styles.pingSection}>
+        <Pressable style={styles.pingButton} onPress={testPing}>
+          <Text style={styles.pingButtonText}>Test: Ping backend</Text>
+        </Pressable>
+        {pingResult ? (
+          <Text style={styles.pingResult}>{pingResult}</Text>
+        ) : null}
       </View>
 
       {loading ? (
@@ -102,6 +123,27 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: "#8B4513" },
   filterText: { fontSize: 12, color: "#555", textTransform: "capitalize" },
   filterTextActive: { color: "#fff" },
+  pingSection: {
+    padding: 12,
+    alignItems: "center",
+    gap: 8,
+  },
+  pingButton: {
+    backgroundColor: "#2196F3",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  pingButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  pingResult: {
+    fontSize: 12,
+    color: "#555",
+    fontStyle: "italic",
+  },
   loader: { marginTop: 40 },
   empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
   emptyText: { fontSize: 16, color: "#999", textAlign: "center" },

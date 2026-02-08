@@ -7,7 +7,7 @@ RUN npm ci
 
 COPY . .
 
-ENV EXPO_PUBLIC_API_URL=/
+ENV EXPO_PUBLIC_API_URL=""
 RUN npx expo export --platform web
 
 FROM nginx:alpine

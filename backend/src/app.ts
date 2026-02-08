@@ -3,7 +3,7 @@ import cors from "cors";
 import pingRouter from "./routes/ping";
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 8000;
 
 app.use(cors()); // enables CORS for any route (later on, change this to specify allowed origins)
 app.use(express.json());
