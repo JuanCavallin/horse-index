@@ -14,7 +14,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res) => {
     const { data, error } = await supabase
       .from("users")
       .select("*")
-      .eq("auth_user_id", req.user.id)
+      .eq("auth_user_id", req.user.authId)
       .single();
 
     if (error) throw error;

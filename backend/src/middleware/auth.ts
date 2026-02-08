@@ -4,7 +4,8 @@ import { supabase } from '../lib/supabase';
 // Extend Express Request type to include user info
 export interface AuthRequest extends Request {
   user?: {
-    id: string;
+    id: number; // Database user ID for audit logging
+    authId: string; // Auth UUID
     email?: string;
     role?: 'viewer' | 'editor' | 'administrator';
   };
@@ -53,7 +54,8 @@ export async function authenticateToken(
 
     // Attach user info to request
     req.user = {
-      id: user.id,
+      id: userData.id as number,
+      authId: user.id,
       email: user.email,
       role: userData.role as 'viewer' | 'editor' | 'administrator',
     };
@@ -129,7 +131,8 @@ export async function optionalAuth(
 
       if (userData) {
         req.user = {
-          id: user.id,
+          id: userData.id as number,
+          authId: user.id,
           email: user.email,
           role: userData.role as 'viewer' | 'editor' | 'administrator',
         };
