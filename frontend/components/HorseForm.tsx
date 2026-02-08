@@ -9,14 +9,29 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { HealthStatus, HorseCreate } from "@/lib/types";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import {
+  HealthStatus,
+  HorseFormData,
+  NewMedicalRecord,
+  RecordType,
+} from "@/lib/types";
 
 const HEALTH_OPTIONS = Object.values(HealthStatus);
 const SEX_OPTIONS = ["Stallion", "Mare", "Gelding"];
+const RECORD_TYPES = Object.values(RecordType);
+
+const TYPE_ICONS: Record<RecordType, React.ComponentProps<typeof FontAwesome>["name"]> = {
+  [RecordType.checkup]: "stethoscope",
+  [RecordType.vaccination]: "medkit",
+  [RecordType.treatment]: "heartbeat",
+  [RecordType.surgery]: "scissors",
+  [RecordType.other]: "file-text-o",
+};
 
 interface HorseFormProps {
-  initialValues?: Partial<HorseCreate>;
-  onSubmit: (data: HorseCreate) => Promise<void>;
+  initialValues?: Partial<HorseFormData>;
+  onSubmit: (data: HorseFormData) => Promise<void>;
   submitLabel?: string;
 }
 
@@ -40,12 +55,55 @@ export default function HorseForm({
   const [notes, setNotes] = useState(initialValues?.notes ?? "");
   const [submitting, setSubmitting] = useState(false);
 
+  // Medical records state
+  const [medicalRecords, setMedicalRecords] = useState<NewMedicalRecord[]>([]);
+  const [showRecordForm, setShowRecordForm] = useState(false);
+  const [recType, setRecType] = useState<RecordType>(RecordType.checkup);
+  const [recDescription, setRecDescription] = useState("");
+  const [recVetName, setRecVetName] = useState("");
+  const [recDate, setRecDate] = useState(new Date().toISOString().split("T")[0]);
+  const [recFollowup, setRecFollowup] = useState("");
+  const [recNotes, setRecNotes] = useState("");
+
   const showAlert = (title: string, msg: string) => {
     if (Platform.OS === "web") {
       window.alert(`${title}: ${msg}`);
     } else {
       Alert.alert(title, msg);
     }
+  };
+
+  const resetRecordForm = () => {
+    setRecType(RecordType.checkup);
+    setRecDescription("");
+    setRecVetName("");
+    setRecDate(new Date().toISOString().split("T")[0]);
+    setRecFollowup("");
+    setRecNotes("");
+  };
+
+  const addMedicalRecord = () => {
+    if (!recDescription.trim() || !recVetName.trim() || !recDate.trim()) {
+      showAlert("Validation", "Please fill in description, vet name, and date for the medical record.");
+      return;
+    }
+    setMedicalRecords((prev) => [
+      ...prev,
+      {
+        record_type: recType,
+        description: recDescription.trim(),
+        vet_name: recVetName.trim(),
+        date: recDate,
+        next_followup: recFollowup.trim() || null,
+        notes: recNotes.trim() || null,
+      },
+    ]);
+    resetRecordForm();
+    setShowRecordForm(false);
+  };
+
+  const removeRecord = (index: number) => {
+    setMedicalRecords((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -65,6 +123,7 @@ export default function HorseForm({
         health_status: healthStatus,
         arrival_date: arrivalDate,
         notes: notes.trim() || null,
+        new_medical_records: medicalRecords.length > 0 ? medicalRecords : undefined,
       });
     } catch (e: any) {
       showAlert("Error", e.message);
@@ -133,6 +192,107 @@ export default function HorseForm({
         numberOfLines={4}
       />
 
+      {/* Medical Records Section */}
+      <View style={styles.medicalSection}>
+        <View style={styles.medicalHeader}>
+          <Text style={styles.sectionTitle}>Medical Records</Text>
+          {!showRecordForm && (
+            <Pressable style={styles.addRecordButton} onPress={() => setShowRecordForm(true)}>
+              <Text style={styles.addRecordText}>+ Add Record</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {medicalRecords.map((rec, index) => (
+          <View key={index} style={styles.recordCard}>
+            <View style={styles.recordHeader}>
+              <FontAwesome
+                name={TYPE_ICONS[rec.record_type]}
+                size={16}
+                color="#8B4513"
+                style={styles.recordIcon}
+              />
+              <Text style={styles.recordType}>
+                {rec.record_type.replace("_", " ").toUpperCase()}
+              </Text>
+              <Text style={styles.recordDate}>{rec.date}</Text>
+              <Pressable onPress={() => removeRecord(index)} style={styles.removeButton}>
+                <FontAwesome name="times-circle" size={20} color="#F44336" />
+              </Pressable>
+            </View>
+            <Text style={styles.recordDescription}>{rec.description}</Text>
+            <Text style={styles.recordVet}>Vet: {rec.vet_name}</Text>
+            {rec.next_followup && (
+              <Text style={styles.recordFollowup}>Follow-up: {rec.next_followup}</Text>
+            )}
+            {rec.notes && <Text style={styles.recordNotes}>{rec.notes}</Text>}
+          </View>
+        ))}
+
+        {showRecordForm && (
+          <View style={styles.recordFormContainer}>
+            <Text style={styles.recordFormTitle}>New Medical Record</Text>
+
+            <Text style={styles.label}>Record Type</Text>
+            <View style={styles.chipRow}>
+              {RECORD_TYPES.map((t) => (
+                <Pressable
+                  key={t}
+                  style={[styles.chip, recType === t && styles.chipSelected]}
+                  onPress={() => setRecType(t)}
+                >
+                  <Text style={[styles.chipText, recType === t && styles.chipTextSelected]}>
+                    {t}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Text style={styles.label}>Description *</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={recDescription}
+              onChangeText={setRecDescription}
+              placeholder="What was done..."
+              multiline
+            />
+
+            <Text style={styles.label}>Vet Name *</Text>
+            <TextInput style={styles.input} value={recVetName} onChangeText={setRecVetName} placeholder="Dr. Smith" />
+
+            <Text style={styles.label}>Date (YYYY-MM-DD) *</Text>
+            <TextInput style={styles.input} value={recDate} onChangeText={setRecDate} placeholder="2025-06-15" />
+
+            <Text style={styles.label}>Next Follow-up (YYYY-MM-DD)</Text>
+            <TextInput style={styles.input} value={recFollowup} onChangeText={setRecFollowup} placeholder="Optional" />
+
+            <Text style={styles.label}>Notes</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={recNotes}
+              onChangeText={setRecNotes}
+              placeholder="Additional notes..."
+              multiline
+            />
+
+            <View style={styles.recordFormActions}>
+              <Pressable
+                style={styles.cancelRecordButton}
+                onPress={() => {
+                  resetRecordForm();
+                  setShowRecordForm(false);
+                }}
+              >
+                <Text style={styles.cancelRecordText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.saveRecordButton} onPress={addMedicalRecord}>
+                <Text style={styles.saveRecordText}>Add Record</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+      </View>
+
       <Pressable
         style={[styles.button, submitting && styles.buttonDisabled]}
         onPress={handleSubmit}
@@ -178,4 +338,56 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+
+  // Medical records section
+  medicalSection: { marginTop: 24, borderTopWidth: 1, borderTopColor: "#ddd", paddingTop: 16 },
+  medicalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#333" },
+  addRecordButton: {
+    backgroundColor: "#8B4513",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  addRecordText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+
+  // Record cards
+  recordCard: {
+    backgroundColor: "#f9f6f2",
+    borderRadius: 10,
+    padding: 14,
+    marginVertical: 6,
+    borderLeftWidth: 4,
+    borderLeftColor: "#8B4513",
+  },
+  recordHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
+  recordIcon: { marginRight: 8 },
+  recordType: { fontSize: 13, fontWeight: "700", color: "#8B4513", flex: 1 },
+  recordDate: { fontSize: 13, color: "#888", marginRight: 8 },
+  removeButton: { padding: 4 },
+  recordDescription: { fontSize: 15, color: "#333", marginBottom: 4 },
+  recordVet: { fontSize: 13, color: "#666" },
+  recordFollowup: { fontSize: 13, color: "#FF9800", marginTop: 4 },
+  recordNotes: { fontSize: 13, color: "#888", fontStyle: "italic", marginTop: 4 },
+
+  // Record form
+  recordFormContainer: {
+    backgroundColor: "#f9f6f2",
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: "#8B4513",
+  },
+  recordFormTitle: { fontSize: 16, fontWeight: "700", color: "#333", marginBottom: 4 },
+  recordFormActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 16 },
+  cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#eee" },
+  cancelRecordText: { fontSize: 14, color: "#666" },
+  saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#8B4513" },
+  saveRecordText: { color: "#fff", fontSize: 14, fontWeight: "700" },
 });
