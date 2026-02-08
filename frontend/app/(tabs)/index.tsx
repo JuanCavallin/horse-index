@@ -5,10 +5,12 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
   useColorScheme,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { horsesApi } from "@/lib/api";
 import { Horse, HealthStatus } from "@/lib/types";
 import HorseCard from "@/components/HorseCard";
@@ -33,6 +35,7 @@ export default function HorseListScreen() {
   const styles = getStyles(theme);
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   //const [filter, setFilter] = useState<HealthStatus | null>(null);
 
   const loadHorses = useCallback(async () => {
@@ -47,6 +50,16 @@ export default function HorseListScreen() {
     }
   }, []);
 
+  // Filter horses based on search query
+  const filteredHorses = horses.filter((horse) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      horse.name.toLowerCase().includes(query) ||
+      (horse.breed && horse.breed.toLowerCase().includes(query)) ||
+      (horse.color && horse.color.toLowerCase().includes(query))
+    );
+  });
+
 
   useFocusEffect(
     useCallback(() => {
@@ -57,6 +70,21 @@ export default function HorseListScreen() {
   return (
     
     <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <FontAwesome name="search" size={18} color={theme.mutedText} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by name, breed, or color..."
+          placeholderTextColor={theme.mutedText}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery ? (
+          <Pressable onPress={() => setSearchQuery("")}>
+            <FontAwesome name="times-circle" size={18} color={theme.mutedText} />
+          </Pressable>
+        ) : null}
+      </View>
       {/*
       <View style={styles.filterRow}>
         {FILTERS.map((f) => (
@@ -79,15 +107,17 @@ export default function HorseListScreen() {
       */}
       {loading ? (
         <ActivityIndicator size="large" color={theme.tint} style={styles.loader} />
-      ) : horses.length === 0 ? (
+      ) : filteredHorses.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyText}>
-            No horses found. Tap "Add Horse" to get started.
+            {searchQuery
+              ? "No horses found matching your search."
+              : "No horses found. Tap \"Add Horse\" to get started."}
           </Text>
         </View>
       ) : (
         <FlatList
-          data={horses}
+          data={filteredHorses}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => <HorseCard horse={item} />}
           contentContainerStyle={styles.list}
@@ -100,6 +130,25 @@ export default function HorseListScreen() {
 const getStyles = (theme: typeof Colors.light) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
+    searchContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.card,
+      borderRadius: 12,
+      marginHorizontal: 16,
+      marginTop: 12,
+      marginBottom: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    searchInput: {
+      flex: 1,
+      marginHorizontal: 8,
+      fontSize: 16,
+      color: theme.text,
+    },
     filterRow: {
       flexDirection: "row",
       flexWrap: "wrap",
