@@ -15,6 +15,8 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { horsesApi, medicalApi } from "@/lib/api";
 import { HorseWithRecords, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
@@ -34,6 +36,8 @@ export default function HorseDetailScreen() {
   // Inline medical record form state
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [recDescription, setRecDescription] = useState("");
+  const [recPhotoUri, setRecPhotoUri] = useState<string | null>(null);
+  const [recPhotoFileName, setRecPhotoFileName] = useState<string | null>(null);
   const [recSubmitting, setRecSubmitting] = useState(false);
 
   const loadHorse = useCallback(() => {
@@ -88,6 +92,27 @@ export default function HorseDetailScreen() {
 
   const resetRecordForm = () => {
     setRecDescription("");
+    setRecPhotoUri(null);
+    setRecPhotoFileName(null);
+  };
+
+  const pickRecordPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      showAlert("Permission", "Photo library permission is required to select an image.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.85,
+    });
+
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const asset = result.assets[0];
+    setRecPhotoUri(asset.uri);
+    setRecPhotoFileName(asset.fileName ?? `doc-${Date.now()}.jpg`);
   };
 
   const showAlert = (title: string, msg: string) => {
@@ -105,9 +130,41 @@ export default function HorseDetailScreen() {
     }
     setRecSubmitting(true);
     try {
+      let photoBase64: string | undefined;
+      let photoFileName: string | undefined;
+
+      if (recPhotoUri && !recPhotoUri.startsWith("http")) {
+        try {
+          if (Platform.OS === "web") {
+            const response = await fetch(recPhotoUri);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            await new Promise<void>((resolve, reject) => {
+              reader.onload = () => {
+                const result = reader.result as string;
+                photoBase64 = result.split(",")[1];
+                photoFileName = recPhotoFileName || "doc-photo.jpg";
+                resolve();
+              };
+              reader.onerror = () => reject(new Error("Failed to read image"));
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            photoBase64 = await FileSystem.readAsStringAsync(recPhotoUri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            photoFileName = recPhotoFileName || "doc-photo.jpg";
+          }
+        } catch (err) {
+          console.error("Failed to read record image:", err);
+        }
+      }
+
       await medicalApi.create({
         horse_id: id,
         description: recDescription.trim(),
+        ...(photoBase64 && { photoBase64 }),
+        ...(photoFileName && { photoFileName }),
       });
       resetRecordForm();
       setShowRecordForm(false);
@@ -210,6 +267,25 @@ export default function HorseDetailScreen() {
         {showRecordForm && (
           <View style={styles.recordFormContainer}>
             <Text style={styles.recordFormTitle}>New Medical Record</Text>
+
+            <Text style={styles.formLabel}>Photo</Text>
+            {recPhotoUri ? (
+              <View style={styles.recPhotoPreviewRow}>
+                <Image source={{ uri: recPhotoUri }} style={styles.recPhotoPreview} />
+                <View style={styles.recPhotoActions}>
+                  <Pressable style={styles.recPhotoButton} onPress={pickRecordPhoto}>
+                    <Text style={styles.recPhotoButtonText}>Change</Text>
+                  </Pressable>
+                  <Pressable style={styles.recPhotoButtonSecondary} onPress={() => { setRecPhotoUri(null); setRecPhotoFileName(null); }}>
+                    <Text style={styles.recPhotoButtonSecondaryText}>Remove</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <Pressable style={styles.recPhotoButton} onPress={pickRecordPhoto}>
+                <Text style={styles.recPhotoButtonText}>Upload Photo</Text>
+              </Pressable>
+            )}
 
             <Text style={styles.formLabel}>Description *</Text>
             <TextInput
@@ -365,6 +441,40 @@ const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
     marginBottom: 4,
   },
   deleteRecordText: { fontSize: 12, color: theme.danger },
+
+  // Record photo picker
+  recPhotoPreviewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 6,
+  },
+  recPhotoPreview: {
+    width: 96,
+    height: 96,
+    borderRadius: 10,
+    backgroundColor: theme.card,
+  },
+  recPhotoActions: {
+    flex: 1,
+    gap: 8,
+  },
+  recPhotoButton: {
+    backgroundColor: theme.tint,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  recPhotoButtonText: { color: theme.onTint, fontSize: 14, fontWeight: "700" },
+  recPhotoButtonSecondary: {
+    backgroundColor: theme.chipBackground,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  recPhotoButtonSecondaryText: { color: theme.text, fontSize: 14, fontWeight: "600" },
 
   // Inline record form
   recordFormContainer: {

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { supabase } from "../lib/supabase";
+import { supabase, supabaseAdmin } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
 
@@ -77,7 +77,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
         const imageBuffer = Buffer.from(photoBase64, "base64");
         const fileName = `horse-${Date.now()}-${photoFileName}`;
 
-        const { data, error: uploadError } = await supabase.storage
+        const { data, error: uploadError } = await supabaseAdmin.storage
           .from("horse-photos")
           .upload(fileName, imageBuffer, {
             contentType: "image/jpeg",
@@ -87,7 +87,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
         if (uploadError) {
           console.error("Image upload error:", uploadError);
         } else if (data) {
-          photoUrl = supabase.storage
+          photoUrl = supabaseAdmin.storage
             .from("horse-photos")
             .getPublicUrl(data.path).data.publicUrl;
         }
@@ -118,13 +118,38 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 
     // Insert inline medical records if provided
     if (new_medical_records && new_medical_records.length > 0) {
-      const records = new_medical_records.map((r: any) => ({
-        horse_id: horse.id,
-        description: r.description,
-        photo_url: r.photo_url ?? null,
-        updated_at: new Date().toISOString(),
-        updated_by: req.user!.id,
-      }));
+      const records = [];
+      for (const r of new_medical_records) {
+        let recPhotoUrl: string | null = null;
+        if (r.photoBase64 && r.photoFileName) {
+          try {
+            const imageBuffer = Buffer.from(r.photoBase64, "base64");
+            const fileName = `doc-${Date.now()}-${r.photoFileName}`;
+            const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+              .from("horse-photos")
+              .upload(fileName, imageBuffer, {
+                contentType: "image/jpeg",
+                upsert: true,
+              });
+            if (uploadError) {
+              console.error("Document image upload error:", uploadError);
+            } else if (uploadData) {
+              recPhotoUrl = supabaseAdmin.storage
+                .from("horse-photos")
+                .getPublicUrl(uploadData.path).data.publicUrl;
+            }
+          } catch (imgErr) {
+            console.error("Failed to upload document image:", imgErr);
+          }
+        }
+        records.push({
+          horse_id: horse.id,
+          description: r.description,
+          photo_url: recPhotoUrl,
+          updated_at: new Date().toISOString(),
+          updated_by: req.user!.id,
+        });
+      }
       const { error: recError } = await supabase
         .from("documents")
         .insert(records);
@@ -168,7 +193,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
         const imageBuffer = Buffer.from(photoBase64, "base64");
         const fileName = `horse-${Date.now()}-${photoFileName}`;
 
-        const { data, error: uploadError } = await supabase.storage
+        const { data, error: uploadError } = await supabaseAdmin.storage
           .from("horse-photos")
           .upload(fileName, imageBuffer, {
             contentType: "image/jpeg",
@@ -178,7 +203,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
         if (uploadError) {
           console.error("Image upload error:", uploadError);
         } else if (data) {
-          photoUrl = supabase.storage
+          photoUrl = supabaseAdmin.storage
             .from("horse-photos")
             .getPublicUrl(data.path).data.publicUrl;
         }

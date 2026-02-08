@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { supabase } from "../lib/supabase";
+import { supabase, supabaseAdmin } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
 
@@ -52,10 +52,36 @@ router.get("/:id", authenticateToken, async (req, res) => {
 // POST /api/medical-records  — create a record
 router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
-    const { horse_id, description, photo_url } = req.body;
+    const { horse_id, description, photoBase64, photoFileName } = req.body;
 
     if (!horse_id || !description) {
       return res.status(400).json({ error: "horse_id and description are required" });
+    }
+
+    // Handle image upload if provided
+    let photoUrl: string | null = null;
+    if (photoBase64 && photoFileName) {
+      try {
+        const imageBuffer = Buffer.from(photoBase64, "base64");
+        const fileName = `doc-${Date.now()}-${photoFileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+          .from("horse-photos")
+          .upload(fileName, imageBuffer, {
+            contentType: "image/jpeg",
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error("Document image upload error:", uploadError);
+        } else if (uploadData) {
+          photoUrl = supabaseAdmin.storage
+            .from("horse-photos")
+            .getPublicUrl(uploadData.path).data.publicUrl;
+        }
+      } catch (imgErr) {
+        console.error("Failed to upload document image:", imgErr);
+      }
     }
 
     const { data, error } = await supabase
@@ -63,7 +89,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
       .insert({
         horse_id,
         description,
-        photo_url: photo_url ?? null,
+        photo_url: photoUrl,
         updated_at: new Date().toISOString(),
         updated_by: req.user!.id,
       })

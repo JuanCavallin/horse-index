@@ -188,6 +188,8 @@ export interface MedicalRecordUpdate
 export type NewMedicalRecord = {
   description: string;
   photo_url?: string | null;
+  photoBase64?: string | null;
+  photoFileName?: string | null;
 };
 
 export interface HorseFormData extends HorseCreate {
