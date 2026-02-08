@@ -426,11 +426,7 @@ export default function HorseDetailScreen() {
               dropdownIconColor={theme.text}
             >
               {TREATMENT_TYPES.map((t) => (
-                <Picker.Item
-                  key={t}
-                  label={t.replace(/_/g, " ")}
-                  value={t}
-                />
+                <Picker.Item key={t} label={t.replace(/_/g, " ")} value={t} />
               ))}
             </Picker>
           </View>

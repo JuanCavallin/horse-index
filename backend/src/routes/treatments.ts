@@ -63,7 +63,7 @@ router.get("/horse/:id", authenticateToken, async (req, res) => {
 // GET /api/treatments/:id — single treatment
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
-    const record = await getFlattenedRecord(req.params.id);
+    const record = await getFlattenedRecord(req.params.id as string);
     if (!record) {
       return res.status(404).json({ error: "Treatment not found" });
     }
@@ -168,9 +168,9 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 
     if (actionUpdateError) throw actionUpdateError;
 
-    const record = await getFlattenedRecord(id);
+    const record = await getFlattenedRecord(id as string);
 
-    if (req.user) {
+    if (req.user && record) {
       await logChanges(req.user.id, "action_taken", original, record);
     }
 
