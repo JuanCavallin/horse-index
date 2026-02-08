@@ -13,7 +13,7 @@ import {
 import { supabase } from "./supabase";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
-const BASE = `${API_URL}/api`;
+const BASE = API_URL.endsWith("/api") ? API_URL : `${API_URL}/api`;
 
 async function getAuthToken(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -22,10 +22,10 @@ async function getAuthToken(): Promise<string | null> {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = await getAuthToken();
-  const headers: HeadersInit = { 
+  const headers = { 
     "Content-Type": "application/json", 
     ...options?.headers 
-  };
+  } as Record<string, string>;
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
