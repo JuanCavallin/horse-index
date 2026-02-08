@@ -34,3 +34,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
+
+// --- 4. Expose supabase globally in development ---
+if (__DEV__) {
+  (global as any).supabase = supabase;
+}

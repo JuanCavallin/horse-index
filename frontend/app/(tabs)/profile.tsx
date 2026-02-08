@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Alert,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -20,6 +21,7 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -44,38 +46,28 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            setLoggingOut(true);
-            try {
-              const { error } = await supabase.auth.signOut();
-              if (error) throw error;
-              
-              // Clear local user state
-              setUser(null);
-              
-              // The auth state listener in _layout.tsx will automatically redirect to login
-              console.log("User logged out successfully");
-            } catch (error) {
-              console.error("Error logging out:", error);
-              Alert.alert("Error", "Failed to logout. Please try again.");
-              setLoggingOut(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear local user state
+      setUser(null);
+      setShowLogoutModal(false);
+      
+      // The auth state listener in _layout.tsx will automatically redirect to login
+      console.log("User logged out successfully");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      Alert.alert("Error", "Failed to logout. Please try again.");
+      setLoggingOut(false);
+      setShowLogoutModal(false);
+    }
   };
 
   if (loading) {
@@ -155,6 +147,53 @@ export default function ProfileScreen() {
           </Pressable>
         )}
       </View>
+
+      <Modal
+        visible={showLogoutModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowLogoutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Logout</Text>
+            <Text style={[styles.modalMessage, { color: theme.subtleText }]}>
+              Are you sure you want to logout?
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.modalButtonCancel,
+                  { borderColor: theme.border },
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => setShowLogoutModal(false)}
+                disabled={loggingOut}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.text }]}>
+                  Cancel
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.modalButtonLogout,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={confirmLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? (
+                  <ActivityIndicator color={theme.onTint} />
+                ) : (
+                  <Text style={styles.modalButtonLogoutText}>Logout</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -244,5 +283,60 @@ const getStyles = (theme: typeof Colors.light) =>
       color: theme.onTint,
       fontSize: 16,
       fontWeight: "600",
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 20,
+    },
+    modalContent: {
+      borderRadius: 12,
+      padding: 24,
+      width: "100%",
+      maxWidth: 400,
+      gap: 16,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    modalMessage: {
+      fontSize: 16,
+      textAlign: "center",
+    },
+    modalButtons: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 8,
+    },
+    modalButtonCancel: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      borderWidth: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    modalButtonLogout: {
+      flex: 1,
+      backgroundColor: theme.danger,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    modalButtonText: {
+      fontSize: 15,
+      fontWeight: "600",
+    },
+    modalButtonLogoutText: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: theme.onTint,
     },
   });

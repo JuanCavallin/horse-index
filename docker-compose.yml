@@ -15,7 +15,7 @@ services:
       args:
         EXPO_PUBLIC_SUPABASE_URL: ${EXPO_PUBLIC_SUPABASE_URL}
         EXPO_PUBLIC_SUPABASE_ANON_KEY: ${EXPO_PUBLIC_SUPABASE_ANON_KEY}
-        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-/api}
     restart: unless-stopped
     ports:
       - "80:80"
