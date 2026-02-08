@@ -43,14 +43,14 @@ router.get("/:id", authenticateToken, async (req, res) => {
     }
 
     const { data: records, error: recError } = await supabase
-      .from("medical_records")
+      .from("documents")
       .select("*")
       .eq("horse_id", id)
-      .order("date", { ascending: false });
+      .order("updated_at", { ascending: false });
 
-    // Don't fail the whole request if medical_records table doesn't exist yet
+    // Don't fail the whole request if documents table doesn't exist yet
     if (recError) {
-      console.error("medical_records query error (non-fatal):", recError.message);
+      console.error("documents query error (non-fatal):", recError.message);
     }
 
     res.json({ ...horse, medical_records: records ?? [] });
@@ -119,17 +119,19 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
     // Insert inline medical records if provided
     if (new_medical_records && new_medical_records.length > 0) {
       const records = new_medical_records.map((r: any) => ({
-        ...r,
         horse_id: horse.id,
+        description: r.description,
+        photo_url: r.photo_url ?? null,
+        updated_at: new Date().toISOString(),
+        updated_by: req.user!.id,
       }));
       const { error: recError } = await supabase
-        .from("medical_records")
+        .from("documents")
         .insert(records);
       if (recError) console.error("Failed to insert medical records:", recError);
       else if (req.user) {
-        // Log each medical record creation
         for (const record of records) {
-          await logCreation(req.user.id, "medical_records", record);
+          await logCreation(req.user.id, "documents", record);
         }
       }
     }
