@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase";
+import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
 // GET /api/horses  — list all horses, optional ?health_status= filter
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
   try {
     let query = supabase.from("horses").select("*").order("name");
 
@@ -23,7 +24,7 @@ router.get("/", async (req, res) => {
 });
 
 // GET /api/horses/:id  — single horse with medical_records
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -56,7 +57,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/horses  — create a horse (optionally with inline medical records)
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, requireEditor, async (req, res) => {
   try {
     const { new_medical_records, ...horseData } = req.body;
 
@@ -92,7 +93,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /api/horses/:id  — update a horse
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body, updated_at: new Date().toISOString(), last_updated: new Date().toISOString() };
@@ -119,7 +120,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE /api/horses/:id  — delete a horse
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 

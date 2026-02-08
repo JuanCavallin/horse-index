@@ -13,6 +13,7 @@ import "react-native-reanimated";
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase'; // <--- Check this path!
 import Colors from "@/constants/Colors";
+import { UserProvider } from '../lib/UserContext';
 
 export { ErrorBoundary } from "expo-router";
 
@@ -91,12 +92,14 @@ export default function RootLayout() {
   // 5. The App
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} /> 
-        <Stack.Screen name="horse/[id]" options={{ title: "Horse Details" }} />
-        <Stack.Screen name="horse/edit/[id]" options={{ title: "Edit Horse" }} />
-      </Stack>
+      <UserProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} /> 
+          <Stack.Screen name="horse/[id]" options={{ title: "Horse Details" }} />
+          <Stack.Screen name="horse/edit/[id]" options={{ title: "Edit Horse" }} />
+        </Stack>
+      </UserProvider>
     </ThemeProvider>
   );
 }

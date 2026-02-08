@@ -6,15 +6,33 @@ import {
   MedicalRecord,
   MedicalRecordCreate,
   MedicalRecordUpdate,
-  AuditLog
+  AuditLog,
+  User,
+  UserUpdate,
 } from "./types";
+import { supabase } from "./supabase";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
 const BASE = `${API_URL}/api`;
 
+async function getAuthToken(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = await getAuthToken();
+  const headers: HeadersInit = { 
+    "Content-Type": "application/json", 
+    ...options?.headers 
+  };
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers,
     ...options,
   });
   if (!res.ok) {
@@ -71,4 +89,13 @@ export const auditApi = {
       method: "POST",
       body: JSON.stringify(data),
     })
+}
+export const usersApi = {
+  me: () => request<User>("/users/me"),
+  list: () => request<User[]>("/users/"),
+  update: (id: number, data: UserUpdate) =>
+    request<User>(`/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 }

@@ -21,6 +21,31 @@ export enum Eye {
 
 }
 
+export enum UserRole {
+  viewer = "viewer",
+  editor = "editor",
+  administrator = "administrator",
+}
+
+export interface User {
+  id: number;
+  auth_user_id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  active_user: boolean;
+  phone: string | null;
+  created_at: string;
+  last_updated: string;
+}
+
+export interface UserUpdate {
+  name?: string;
+  role?: UserRole;
+  active_user?: boolean;
+  phone?: string | null;
+}
+
 export interface Horse {
   id: number;
   name: string;

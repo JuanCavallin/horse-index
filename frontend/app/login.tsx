@@ -28,6 +28,9 @@ export default function Login() {
       } else {
         Alert.alert("Sign In Error", error.message);
       }
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log("JWT:", session?.access_token);
     }
     setLoading(false);
     // The _layout.tsx listener will handle the redirect automatically
