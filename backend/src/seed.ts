@@ -40,14 +40,14 @@ async function seed() {
     .from('horses')
     .insert([
       {
-        name: 'Thunder', breed: 'Mustang', age: 22, gender: 'Gelding', color: 'Bay',
+        name: 'Thunder', breed: 'Mustang', birth_year: 2004, gender: 'Gelding', color: 'Bay',
         health_status: 'healthy', arrival_date: '2018-03-15', ex_racehorse: true,
         pasture: 'North Field', grooming_day: 'Monday',
         behavior_notes: 'Very friendly, loves carrots.',
         medical_notes: 'No current issues.', updated_by: adminId,
       },
       {
-        name: 'Belle', breed: 'Arabian', age: 28, gender: 'Mare', color: 'Grey',
+        name: 'Belle', breed: 'Arabian', birth_year: 1998, gender: 'Mare', color: 'Grey',
         health_status: 'needs_attention', arrival_date: '2015-06-01',
         heart_murmur: true, requires_extra_feed: true,
         pasture: 'South Pasture', grooming_day: 'Wednesday',
@@ -55,7 +55,7 @@ async function seed() {
         medical_notes: 'Heart murmur - monitor closely.', updated_by: adminId,
       },
       {
-        name: 'Rusty', breed: 'Quarter Horse', age: 30, gender: 'Gelding', color: 'Chestnut',
+        name: 'Rusty', breed: 'Quarter Horse', birth_year: 1996, gender: 'Gelding', color: 'Chestnut',
         health_status: 'palliative', arrival_date: '2012-09-10',
         cushings_positive: true, military_police_horse: true,
         pasture: 'Barn Area', grooming_day: 'Friday',
@@ -63,13 +63,13 @@ async function seed() {
         medical_notes: 'Cushings positive, on Prascend.', updated_by: staffId,
       },
       {
-        name: 'Daisy', breed: 'Thoroughbred', age: 18, gender: 'Mare', color: 'Dark Bay',
+        name: 'Daisy', breed: 'Thoroughbred', birth_year: 2008, gender: 'Mare', color: 'Dark Bay',
         health_status: 'healthy', arrival_date: '2020-01-20', ex_racehorse: true,
         pasture: 'East Field', grooming_day: 'Tuesday',
         behavior_notes: 'Energetic, needs daily exercise.', updated_by: staffId,
       },
       {
-        name: 'Scout', breed: 'Paint', age: 25, gender: 'Gelding', color: 'Pinto',
+        name: 'Scout', breed: 'Paint', birth_year: 2001, gender: 'Gelding', color: 'Pinto',
         health_status: 'critical', arrival_date: '2016-11-05',
         kicks: true, heaves: true,
         pasture: 'Barn Area', grooming_day: 'Thursday',
