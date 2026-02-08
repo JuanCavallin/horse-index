@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import {
   Eye,
   HealthStatus,
@@ -223,20 +224,36 @@ export default function HorseForm({
 
       // Convert image to base64 if present
       if (photoUri && !photoUri.startsWith("http")) {
-        const response = await fetch(photoUri);
-        const blob = await response.blob();
-        const reader = new FileReader();
-        
-        await new Promise((resolve, reject) => {
-          reader.onload = () => {
-            const result = reader.result as string;
-            photoBase64 = result.split(",")[1]; // Get base64 without data: prefix
+        try {
+          if (Platform.OS === "web") {
+            // On web, fetch the image and convert to base64
+            const response = await fetch(photoUri);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            
+            await new Promise<void>((resolve, reject) => {
+              reader.onload = () => {
+                const result = reader.result as string;
+                photoBase64 = result.split(",")[1]; // Get base64 without data: prefix
+                photoName = photoFileName || "photo.jpg";
+                resolve();
+              };
+              reader.onerror = () => reject(new Error("Failed to read image"));
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            // On native, use FileSystem to read as base64
+            photoBase64 = await FileSystem.readAsStringAsync(photoUri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
             photoName = photoFileName || "photo.jpg";
-            resolve(null);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
+          }
+        } catch (err) {
+          console.error("Failed to read image:", err);
+          showAlert("Error", `Failed to process image: ${err instanceof Error ? err.message : "Unknown error"}`);
+          setSubmitting(false);
+          return;
+        }
       }
 
       await onSubmit({

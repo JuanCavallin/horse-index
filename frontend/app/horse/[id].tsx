@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  Image,
   useColorScheme,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -170,6 +171,16 @@ export default function HorseDetailScreen() {
       <View style={styles.header}>
         <Text style={styles.name}>{horse.name}</Text>
       </View>
+
+      {horse.photo_url && (
+        <View style={styles.photoContainer}>
+          <Image 
+            source={{ uri: horse.photo_url }} 
+            style={styles.photo}
+            resizeMode="cover"
+          />
+        </View>
+      )}
 
       <View style={styles.detailGrid}>
         <DetailRow label="Breed" value={horse.breed} styles={styles} />
@@ -336,6 +347,21 @@ const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
   name: { fontSize: 28, fontWeight: "800", color: theme.text },
   badge: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14 },
   badgeText: { color: theme.onTint, fontSize: 13, fontWeight: "600", textTransform: "capitalize" },
+  photoContainer: {
+    marginBottom: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: theme.card,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  photo: {
+    width: "100%",
+    height: 400,
+  },
   detailGrid: {
     backgroundColor: theme.card,
     borderRadius: 12,

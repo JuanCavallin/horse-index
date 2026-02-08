@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Pressable, StyleSheet, Text, View, Image, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
 import { Horse/*, HealthStatus */} from "@/lib/types";
 
@@ -30,6 +30,13 @@ export default function HorseCard({ horse }: { horse: Horse }) {
       style={styles.card}
       onPress={() => router.push(`/horse/${horse.id}`)}
     >
+      {horse.photo_url && (
+        <Image 
+          source={{ uri: horse.photo_url }} 
+          style={styles.photoThumbnail}
+          resizeMode="cover"
+        />
+      )}
       <View style={styles.row}>
         <View style={styles.info}>
           <Text style={styles.name}>{horse.name}</Text>
@@ -68,6 +75,13 @@ const getStyles = (theme: typeof Colors.light) =>
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
+    },
+    photoThumbnail: {
+      width: "100%",
+      height: 200,
+      borderRadius: 8,
+      marginBottom: 12,
+      backgroundColor: "#e0e0e0",
     },
     row: {
       flexDirection: "row",
