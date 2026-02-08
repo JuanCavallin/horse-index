@@ -20,6 +20,8 @@ import {
   HealthStatus,
   HorseFormData,
   NewMedicalRecord,
+  NewTreatment,
+  TreatmentType,
 } from "@/lib/types";
 import Colors from "@/constants/Colors";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +29,7 @@ import { supabase } from "@/lib/supabase";
 //const HEALTH_OPTIONS = Object.values(HealthStatus);
 const GENDER_OPTIONS = ["Mare", "Gelding"];
 const EYE_OPTIONS = Object.values(Eye);
+const TREATMENT_TYPES = Object.values(TreatmentType);
 
 interface HorseFormProps {
   initialValues?: Partial<HorseFormData>;
@@ -131,6 +134,14 @@ export default function HorseForm({
   const [recDescription, setRecDescription] = useState("");
   const [recPhotoUri, setRecPhotoUri] = useState<string | null>(null);
   const [recPhotoFileName, setRecPhotoFileName] = useState<string | null>(null);
+
+  // Treatments state
+  const [treatments, setTreatments] = useState<NewTreatment[]>([]);
+  const [showTreatmentForm, setShowTreatmentForm] = useState(false);
+  const [treatType, setTreatType] = useState<string>(TreatmentType.VetExam);
+  const [treatCustomType, setTreatCustomType] = useState("");
+  const [treatFrequency, setTreatFrequency] = useState("");
+  const [treatNotes, setTreatNotes] = useState("");
 
   const showAlert = (title: string, msg: string) => {
     if (Platform.OS === "web") {
@@ -243,6 +254,35 @@ export default function HorseForm({
     setMedicalRecords((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const resetTreatmentForm = () => {
+    setTreatType(TreatmentType.VetExam);
+    setTreatCustomType("");
+    setTreatFrequency("");
+    setTreatNotes("");
+  };
+
+  const addTreatment = () => {
+    const finalType = treatType === TreatmentType.Other ? treatCustomType.trim() : treatType;
+    if (!finalType) {
+      showAlert("Validation", "Please select or enter a treatment type.");
+      return;
+    }
+    setTreatments((prev) => [
+      ...prev,
+      {
+        type: finalType,
+        frequency: treatFrequency.trim() || null,
+        notes: treatNotes.trim() || null,
+      },
+    ]);
+    resetTreatmentForm();
+    setShowTreatmentForm(false);
+  };
+
+  const removeTreatment = (index: number) => {
+    setTreatments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async () => {
     if (!name.trim() || !breed.trim() || !birthYear.trim() || !color.trim()) {
       showAlert("Validation", "Please fill in all required fields.");
@@ -322,6 +362,7 @@ export default function HorseForm({
         regular_treatment: regularTreatment,
         medical_notes: medicalNotes.trim() || null,
         new_medical_records: medicalRecords.length > 0 ? medicalRecords : undefined,
+        new_treatments: treatments.length > 0 ? treatments : undefined,
         // Send image as base64 to backend for upload
         ...(photoBase64 && { photoBase64 }),
         ...(photoName && { photoFileName: photoName }),
@@ -593,6 +634,104 @@ export default function HorseForm({
               </Pressable>
               <Pressable style={styles.saveRecordButton} onPress={addMedicalRecord}>
                 <Text style={styles.saveRecordText}>Add Record</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+      </View>
+
+      {/* === Treatments === */}
+      <View style={styles.medicalSection}>
+        <View style={styles.medicalHeader}>
+          <Text style={styles.sectionTitle}>Treatments</Text>
+          {!showTreatmentForm && (
+            <Pressable style={styles.addRecordButton} onPress={() => setShowTreatmentForm(true)}>
+              <Text style={styles.addRecordText}>+ Add Treatment</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {treatments.map((t, index) => (
+          <View key={index} style={styles.recordCard}>
+            <View style={styles.recordHeader}>
+              <FontAwesome
+                name="medkit"
+                size={16}
+                color={theme.tint}
+                style={styles.recordIcon}
+              />
+              <Text style={styles.recordType}>
+                {t.type.replace(/_/g, " ")}
+              </Text>
+              <Pressable onPress={() => removeTreatment(index)} style={styles.removeButton}>
+                <FontAwesome name="times-circle" size={20} color={theme.danger} />
+              </Pressable>
+            </View>
+            {t.frequency && <Text style={styles.recordDescription}>Frequency: {t.frequency}</Text>}
+            {t.notes && <Text style={styles.recordDescription}>{t.notes}</Text>}
+          </View>
+        ))}
+
+        {showTreatmentForm && (
+          <View style={styles.recordFormContainer}>
+            <Text style={styles.recordFormTitle}>New Treatment</Text>
+
+            <Text style={styles.label}>Treatment Type *</Text>
+            <View style={styles.chipRow}>
+              {TREATMENT_TYPES.map((t) => (
+                <Pressable
+                  key={t}
+                  style={[styles.chip, treatType === t && styles.chipSelected]}
+                  onPress={() => setTreatType(t)}
+                >
+                  <Text style={[styles.chipText, treatType === t && styles.chipTextSelected]}>
+                    {t.replace(/_/g, " ")}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {treatType === TreatmentType.Other && (
+              <>
+                <Text style={styles.label}>Custom Type *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={treatCustomType}
+                  onChangeText={setTreatCustomType}
+                  placeholder="Enter treatment type..."
+                />
+              </>
+            )}
+
+            <Text style={styles.label}>Frequency</Text>
+            <TextInput
+              style={styles.input}
+              value={treatFrequency}
+              onChangeText={setTreatFrequency}
+              placeholder="e.g. Once daily, Twice weekly"
+            />
+
+            <Text style={styles.label}>Notes</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={treatNotes}
+              onChangeText={setTreatNotes}
+              placeholder="Additional notes..."
+              multiline
+            />
+
+            <View style={styles.recordFormActions}>
+              <Pressable
+                style={styles.cancelRecordButton}
+                onPress={() => {
+                  resetTreatmentForm();
+                  setShowTreatmentForm(false);
+                }}
+              >
+                <Text style={styles.cancelRecordText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.saveRecordButton} onPress={addTreatment}>
+                <Text style={styles.saveRecordText}>Add Treatment</Text>
               </Pressable>
             </View>
           </View>

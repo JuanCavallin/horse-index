@@ -6,6 +6,9 @@ import {
   MedicalRecord,
   MedicalRecordCreate,
   MedicalRecordUpdate,
+  TreatmentRecord,
+  TreatmentRecordCreate,
+  TreatmentRecordUpdate,
   AuditLog,
   User,
   UserUpdate,
@@ -76,6 +79,24 @@ export const medicalApi = {
     }),
   delete: (id: string) =>
     request<void>(`/medical-records/${id}`, { method: "DELETE" }),
+};
+
+export const treatmentsApi = {
+  listForHorse: (horseId: string) =>
+    request<TreatmentRecord[]>(`/treatments/horse/${horseId}`),
+  get: (id: string) => request<TreatmentRecord>(`/treatments/${id}`),
+  create: (data: TreatmentRecordCreate) =>
+    request<TreatmentRecord>("/treatments/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id: string, data: TreatmentRecordUpdate) =>
+    request<TreatmentRecord>(`/treatments/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request<void>(`/treatments/${id}`, { method: "DELETE" }),
 };
 
 //TODO: api for tasks, users

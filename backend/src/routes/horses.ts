@@ -53,7 +53,31 @@ router.get("/:id", authenticateToken, async (req, res) => {
       console.error("documents query error (non-fatal):", recError.message);
     }
 
-    res.json({ ...horse, medical_records: records ?? [] });
+    // Fetch treatments for this horse
+    const { data: treatmentData, error: treatError } = await supabase
+      .from("action_taken")
+      .select("id, horse_id, treatment_id, action_taken_notes, last_updated, updated_by, treatments(type, frequency)")
+      .eq("horse_id", id)
+      .order("last_updated", { ascending: false });
+
+    if (treatError) {
+      console.error("treatments query error (non-fatal):", treatError.message);
+    }
+
+    const treatments = (treatmentData || []).map((row: any) => {
+      const t = row.treatments as any;
+      return {
+        id: row.id,
+        horse_id: row.horse_id,
+        type: t?.type ?? "",
+        frequency: t?.frequency ?? null,
+        notes: row.action_taken_notes,
+        updated_at: row.last_updated,
+        updated_by: row.updated_by,
+      };
+    });
+
+    res.json({ ...horse, medical_records: records ?? [], treatments });
   } catch (err) {
     console.error("GET /api/horses/:id error:", err);
     res.status(500).json({ error: "Failed to fetch horse" });
@@ -63,7 +87,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 // POST /api/horses  — create a horse (optionally with inline medical records and image)
 router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
-    const { new_medical_records, photoBase64, photoFileName, ...horseData } = req.body;
+    const { new_medical_records, new_treatments, photoBase64, photoFileName, ...horseData } = req.body;
 
     if (!horseData.name) {
       return res.status(400).json({ error: "name is required" });
@@ -157,6 +181,49 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
       else if (req.user) {
         for (const record of records) {
           await logCreation(req.user.id, "documents", record);
+        }
+      }
+    }
+
+    // Insert inline treatments if provided
+    if (new_treatments && new_treatments.length > 0) {
+      for (const t of new_treatments) {
+        try {
+          const { data: treatment, error: treatmentError } = await supabase
+            .from("treatments")
+            .insert({
+              type: t.type,
+              frequency: t.frequency ?? null,
+              last_updated: new Date().toISOString(),
+              updated_by: req.user!.id,
+            })
+            .select()
+            .single();
+
+          if (treatmentError) {
+            console.error("Failed to insert treatment:", treatmentError);
+            continue;
+          }
+
+          const { data: actionTaken, error: actionError } = await supabase
+            .from("action_taken")
+            .insert({
+              horse_id: horse.id,
+              treatment_id: treatment.id,
+              action_taken_notes: t.notes ?? null,
+              last_updated: new Date().toISOString(),
+              updated_by: req.user!.id,
+            })
+            .select()
+            .single();
+
+          if (actionError) {
+            console.error("Failed to insert action_taken:", actionError);
+          } else if (req.user) {
+            await logCreation(req.user.id, "action_taken", actionTaken);
+          }
+        } catch (tErr) {
+          console.error("Failed to create inline treatment:", tErr);
         }
       }
     }

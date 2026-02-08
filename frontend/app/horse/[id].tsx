@@ -17,11 +17,13 @@ import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { horsesApi, medicalApi } from "@/lib/api";
-import { HorseWithRecords, MedicalRecordCreate } from "@/lib/types";
+import { horsesApi, medicalApi, treatmentsApi } from "@/lib/api";
+import { HorseWithRecords, MedicalRecordCreate, TreatmentRecord, TreatmentType } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
 import Colors from "@/constants/Colors";
 import { useUser } from "@/lib/UserContext";
+import { Picker } from "@react-native-picker/picker";
+const TREATMENT_TYPES = Object.values(TreatmentType);
 
 export default function HorseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,6 +41,14 @@ export default function HorseDetailScreen() {
   const [recPhotoUri, setRecPhotoUri] = useState<string | null>(null);
   const [recPhotoFileName, setRecPhotoFileName] = useState<string | null>(null);
   const [recSubmitting, setRecSubmitting] = useState(false);
+
+  // Inline treatment form state
+  const [showTreatmentForm, setShowTreatmentForm] = useState(false);
+  const [treatType, setTreatType] = useState<string>(TreatmentType.VetExam);
+  const [treatCustomType, setTreatCustomType] = useState("");
+  const [treatFrequency, setTreatFrequency] = useState("");
+  const [treatNotes, setTreatNotes] = useState("");
+  const [treatSubmitting, setTreatSubmitting] = useState(false);
 
   const loadHorse = useCallback(() => {
     if (!id) return;
@@ -173,6 +183,54 @@ export default function HorseDetailScreen() {
       showAlert("Error", e.message);
     } finally {
       setRecSubmitting(false);
+    }
+  };
+
+  const resetTreatmentForm = () => {
+    setTreatType(TreatmentType.VetExam);
+    setTreatCustomType("");
+    setTreatFrequency("");
+    setTreatNotes("");
+  };
+
+  const handleAddTreatment = async () => {
+    const finalType = treatType === TreatmentType.Other ? treatCustomType.trim() : treatType;
+    if (!finalType) {
+      showAlert("Validation", "Please select or enter a treatment type.");
+      return;
+    }
+    setTreatSubmitting(true);
+    try {
+      await treatmentsApi.create({
+        horse_id: id,
+        type: finalType,
+        frequency: treatFrequency.trim() || null,
+        notes: treatNotes.trim() || null,
+      });
+      resetTreatmentForm();
+      setShowTreatmentForm(false);
+      loadHorse();
+    } catch (e: any) {
+      showAlert("Error", e.message);
+    } finally {
+      setTreatSubmitting(false);
+    }
+  };
+
+  const confirmDeleteTreatment = (treatmentId: string) => {
+    const doDelete = async () => {
+      await treatmentsApi.delete(treatmentId);
+      loadHorse();
+    };
+    if (Platform.OS === "web") {
+      if (window.confirm("Delete this treatment?")) {
+        doDelete();
+      }
+    } else {
+      Alert.alert("Delete Treatment", "Delete this treatment?", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: doDelete },
+      ]);
     }
   };
 
@@ -330,6 +388,131 @@ export default function HorseDetailScreen() {
                 <Pressable
                   style={styles.deleteRecordButton}
                   onPress={() => confirmDeleteRecord(r.id)}
+                >
+                  <FontAwesome name="trash-o" size={14} color={theme.danger} />
+                  <Text style={styles.deleteRecordText}>Delete</Text>
+                </Pressable>
+              )}
+            </View>
+          ))
+        )}
+      </View>
+
+      {/* === Treatments === */}
+      <View style={styles.treatmentSection}>
+        <View style={styles.medicalHeader}>
+          <Text style={styles.sectionTitle}>Treatments</Text>
+          {!showTreatmentForm && canEdit && (
+            <Pressable
+              style={styles.addRecordButton}
+              onPress={() => setShowTreatmentForm(true)}
+            >
+              <Text style={styles.addRecordText}>+ Add Treatment</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {showTreatmentForm && (
+          <View style={styles.recordFormContainer}>
+            <Text style={styles.recordFormTitle}>New Treatment</Text>
+
+          <Text style={styles.formLabel}>Treatment Type *</Text>
+
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={treatType}
+              onValueChange={(value) => setTreatType(value)}
+              style={styles.picker}
+              dropdownIconColor={theme.text}
+            >
+              {TREATMENT_TYPES.map((t) => (
+                <Picker.Item
+                  key={t}
+                  label={t.replace(/_/g, " ")}
+                  value={t}
+                />
+              ))}
+            </Picker>
+          </View>
+
+
+            {treatType === TreatmentType.Other && (
+              <>
+                <Text style={styles.formLabel}>Custom Type *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={treatCustomType}
+                  onChangeText={setTreatCustomType}
+                  placeholder="Enter treatment type..."
+                />
+              </>
+            )}
+
+            <Text style={styles.formLabel}>Frequency</Text>
+            <TextInput
+              style={styles.formInput}
+              value={treatFrequency}
+              onChangeText={setTreatFrequency}
+              placeholder="e.g. Once daily, Twice weekly"
+            />
+
+            <Text style={styles.formLabel}>Notes</Text>
+            <TextInput
+              style={[styles.formInput, styles.textArea]}
+              value={treatNotes}
+              onChangeText={setTreatNotes}
+              placeholder="Additional notes..."
+              multiline
+            />
+
+            <View style={styles.recordFormActions}>
+              <Pressable
+                style={styles.cancelRecordButton}
+                onPress={() => {
+                  resetTreatmentForm();
+                  setShowTreatmentForm(false);
+                }}
+              >
+                <Text style={styles.cancelRecordText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.saveRecordButton, treatSubmitting && styles.buttonDisabled]}
+                onPress={handleAddTreatment}
+                disabled={treatSubmitting}
+              >
+                <Text style={styles.saveRecordText}>
+                  {treatSubmitting ? "Saving..." : "Add Treatment"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {horse.treatments.length === 0 && !showTreatmentForm ? (
+          <Text style={styles.emptyText}>No treatments yet.</Text>
+        ) : (
+          horse.treatments.map((t) => (
+            <View key={t.id} style={styles.treatmentCard}>
+              <View style={styles.treatmentCardHeader}>
+                <FontAwesome name="medkit" size={16} color={theme.tint} style={{ marginRight: 8 }} />
+                <Text style={styles.treatmentType}>
+                  {t.type.replace(/_/g, " ")}
+                </Text>
+                <Text style={styles.treatmentDate}>
+                  {new Date(t.updated_at).toLocaleDateString()}
+                </Text>
+              </View>
+              {t.frequency && (
+                <Text style={styles.treatmentFrequency}>Frequency: {t.frequency}</Text>
+              )}
+              {t.notes && (
+                <Text style={styles.treatmentNotes}>{t.notes}</Text>
+              )}
+              <Text style={styles.treatmentUpdatedBy}>Updated by: {t.updated_by}</Text>
+              {canEdit && (
+                <Pressable
+                  style={styles.deleteRecordButton}
+                  onPress={() => confirmDeleteTreatment(t.id)}
                 >
                   <FontAwesome name="trash-o" size={14} color={theme.danger} />
                   <Text style={styles.deleteRecordText}>Delete</Text>
@@ -504,4 +687,58 @@ const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
   saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.tint },
   saveRecordText: { color: theme.onTint, fontSize: 14, fontWeight: "700" },
   buttonDisabled: { opacity: 0.6 },
+
+  // Treatment section
+  treatmentSection: { marginTop: 24 },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
+  treatChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: theme.chipBackground,
+  },
+  treatChipSelected: { backgroundColor: theme.tint },
+  treatChipText: { fontSize: 12, color: theme.text },
+  treatChipTextSelected: { color: theme.onTint },
+pickerWrapper: {
+  borderWidth: 1,
+  borderColor: theme.border,
+  borderRadius: 8,
+  backgroundColor: theme.card,
+  overflow: "hidden",
+  marginTop: 4,
+},
+picker: {
+  color: theme.text,
+  // iOS ignores height sometimes; wrapper handles the look
+},
+  // Treatment cards
+  treatmentCard: {
+    backgroundColor: theme.card,
+    borderRadius: 10,
+    padding: 14,
+    marginVertical: 6,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.tint,
+  },
+  treatmentCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  treatmentType: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: theme.tint,
+    flex: 1,
+  },
+  treatmentDate: { fontSize: 13, color: theme.subtleText },
+  treatmentFrequency: {
+    fontSize: 14,
+    color: theme.text,
+    marginBottom: 4,
+    fontStyle: "italic",
+  },
+  treatmentNotes: { fontSize: 14, color: theme.text, marginBottom: 4 },
+  treatmentUpdatedBy: { fontSize: 13, color: theme.mutedText },
 });

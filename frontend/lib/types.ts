@@ -84,6 +84,7 @@ export interface Horse {
 
 export interface HorseWithRecords extends Horse {
   medical_records: MedicalRecord[];
+  treatments: TreatmentRecord[];
 }
 
 export interface HorseCreate {
@@ -166,21 +167,31 @@ export enum TreatmentType {
   Other = "OTHER"
 }
 
-//TODO: how to handle "other option"
 export interface TreatmentRecord {
   id: string;
-  //If treatment type equals other, set type to string
+  horse_id: string;
   type: TreatmentType | string;
-  frequency?: string | null; // times per day, week, month, etc
-  last_updated: string;
+  frequency: string | null;
+  notes: string | null;
+  updated_at: string;
   updated_by: string;
 }
 
-//TODO: may not be necessary since this will be a niche feature for admin to add and will be complicated to set up. Can just preconfigure with some from the database rn
-export interface TreatmentRecordCreate { 
+export interface TreatmentRecordCreate {
+  horse_id: string;
   type: TreatmentType | string;
-  frequency?: string | null; // times per day, week, month, etc
+  frequency?: string | null;
+  notes?: string | null;
 }
+
+export interface TreatmentRecordUpdate
+  extends Partial<Omit<TreatmentRecordCreate, "horse_id">> {}
+
+export type NewTreatment = {
+  type: TreatmentType | string;
+  frequency?: string | null;
+  notes?: string | null;
+};
 
 export interface MedicalRecordUpdate
   extends Partial<Omit<MedicalRecordCreate, "horse_id">> {}
@@ -194,6 +205,7 @@ export type NewMedicalRecord = {
 
 export interface HorseFormData extends HorseCreate {
   new_medical_records?: NewMedicalRecord[];
+  new_treatments?: NewTreatment[];
   photoBase64?: string | null;
   photoFileName?: string | null;
 }
