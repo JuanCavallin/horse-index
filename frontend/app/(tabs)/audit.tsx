@@ -6,10 +6,12 @@ import {
   StyleSheet,
   Text,
   View,
+  useColorScheme,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { auditApi } from "@/lib/api";
 import type { AuditLog } from "@/lib/types";
+import Colors from "@/constants/Colors";
 
 const formatDateTime = (value: string) => {
   const d = new Date(value);
@@ -19,6 +21,9 @@ const formatDateTime = (value: string) => {
 const displayValue = (v: string | null) => (v ? v : "—");
 
 export default function AuditLogListScreen() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const styles = getStyles(theme);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [pingResult, setPingResult] = useState<string>("");
@@ -79,7 +84,7 @@ export default function AuditLogListScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#8B4513" style={styles.loader} />
+        <ActivityIndicator size="large" color={theme.tint} style={styles.loader} />
       ) : auditLogs.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyText}>No audit logs found.</Text>
@@ -130,81 +135,82 @@ export default function AuditLogListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+const getStyles = (theme: typeof Colors.light) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background },
 
-  headerRow: {
-    paddingHorizontal: 12,
-    paddingTop: 14,
-    paddingBottom: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  title: { fontSize: 18, fontWeight: "700", color: "#222" },
-  refreshBtn: {
-    backgroundColor: "#8B4513",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  refreshText: { color: "#fff", fontWeight: "700", fontSize: 12 },
+    headerRow: {
+      paddingHorizontal: 12,
+      paddingTop: 14,
+      paddingBottom: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    title: { fontSize: 18, fontWeight: "700", color: theme.text },
+    refreshBtn: {
+      backgroundColor: theme.tint,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    refreshText: { color: theme.onTint, fontWeight: "700", fontSize: 12 },
 
-  pingSection: {
-    paddingHorizontal: 12,
-    paddingBottom: 10,
-    alignItems: "center",
-    gap: 8,
-  },
-  pingButton: {
-    backgroundColor: "#2196F3",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  pingButtonText: { color: "#fff", fontSize: 14, fontWeight: "600" },
-  pingResult: { fontSize: 12, color: "#555", fontStyle: "italic" },
+    pingSection: {
+      paddingHorizontal: 12,
+      paddingBottom: 10,
+      alignItems: "center",
+      gap: 8,
+    },
+    pingButton: {
+      backgroundColor: theme.info,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    pingButtonText: { color: theme.onTint, fontSize: 14, fontWeight: "600" },
+    pingResult: { fontSize: 12, color: theme.mutedText, fontStyle: "italic" },
 
-  tableHeader: {
-    flexDirection: "row",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#e6e6e6",
-  },
-  th: { fontSize: 12, fontWeight: "700", color: "#444" },
-  thDate: { flex: 2.1 },
-  thUser: { flex: 1.1 },
-  thTable: { flex: 1.3 },
-  thField: { flex: 1.3 },
-  thChange: { flex: 2.6 },
+    tableHeader: {
+      flexDirection: "row",
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      backgroundColor: theme.card,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: theme.border,
+    },
+    th: { fontSize: 12, fontWeight: "700", color: theme.mutedText },
+    thDate: { flex: 2.1 },
+    thUser: { flex: 1.1 },
+    thTable: { flex: 1.3 },
+    thField: { flex: 1.3 },
+    thChange: { flex: 2.6 },
 
-  loader: { marginTop: 40 },
+    loader: { marginTop: 40 },
 
-  empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
-  emptyText: { fontSize: 16, color: "#999", textAlign: "center" },
+    empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
+    emptyText: { fontSize: 16, color: theme.subtleText, textAlign: "center" },
 
-  list: { paddingVertical: 8 },
+    list: { paddingVertical: 8 },
 
-  row: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderColor: "#efefef",
-  },
+    row: {
+      flexDirection: "row",
+      gap: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      backgroundColor: theme.card,
+      borderBottomWidth: 1,
+      borderColor: theme.border,
+    },
 
-  td: { fontSize: 12, color: "#333" },
+  td: { fontSize: 12, color: theme.text },
   tdDate: { flex: 2.1 },
   tdUser: { flex: 1.1 },
   tdTable: { flex: 1.3 },
   tdField: { flex: 1.3 },
 
   changeCell: { flex: 2.6 },
-  beforeAfterLabel: { fontSize: 10, color: "#777", fontWeight: "700" },
-  beforeAfterValue: { fontSize: 12, color: "#222" },
+  beforeAfterLabel: { fontSize: 10, color: theme.subtleText, fontWeight: "700" },
+  beforeAfterValue: { fontSize: 12, color: theme.text },
 });

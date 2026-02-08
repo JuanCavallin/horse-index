@@ -18,6 +18,8 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tabIconDefault,
+        tabBarStyle: { backgroundColor: Colors[colorScheme ?? "light"].card },
       }}
     >
       <Tabs.Screen
@@ -48,6 +50,13 @@ export default function TabLayout() {
         options={{
           title: "Audit",
           tabBarIcon: ({ color }) => <TabBarIcon name="file-text" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
     </Tabs>

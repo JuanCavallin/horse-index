@@ -1,14 +1,17 @@
 import { useCallback, useState } from "react";
-import { ActivityIndicator, View, StyleSheet } from "react-native";
+import { ActivityIndicator, View, StyleSheet, useColorScheme } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { horsesApi, medicalApi } from "@/lib/api";
 import { HorseWithRecords, HorseFormData } from "@/lib/types";
 import HorseForm from "@/components/HorseForm";
+import Colors from "@/constants/Colors";
 
 export default function EditHorseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +41,7 @@ export default function EditHorseScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#8B4513" />
+        <ActivityIndicator size="large" color={theme.tint} />
       </View>
     );
   }

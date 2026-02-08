@@ -6,11 +6,13 @@ import {
   StyleSheet,
   Text,
   View,
+  useColorScheme,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { horsesApi } from "@/lib/api";
 import { Horse, HealthStatus } from "@/lib/types";
 import HorseCard from "@/components/HorseCard";
+import Colors from "@/constants/Colors";
 
 //TODO: recreate filters with different types of treatments currently being used
 /**
@@ -26,6 +28,9 @@ import HorseCard from "@/components/HorseCard";
 
 
 export default function HorseListScreen() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const styles = getStyles(theme);
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
   //const [filter, setFilter] = useState<HealthStatus | null>(null);
@@ -93,7 +98,7 @@ export default function HorseListScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#8B4513" style={styles.loader} />
+        <ActivityIndicator size="large" color={theme.tint} style={styles.loader} />
       ) : horses.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyText}>
@@ -112,47 +117,48 @@ export default function HorseListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  filterRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    padding: 12,
-    paddingBottom: 4,
-  },
-  filterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: "#e0e0e0",
-  },
-  filterChipActive: { backgroundColor: "#8B4513" },
-  filterText: { fontSize: 12, color: "#555", textTransform: "capitalize" },
-  filterTextActive: { color: "#fff" },
-  pingSection: {
-    padding: 12,
-    alignItems: "center",
-    gap: 8,
-  },
-  pingButton: {
-    backgroundColor: "#2196F3",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  pingButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  pingResult: {
-    fontSize: 12,
-    color: "#555",
-    fontStyle: "italic",
-  },
-  loader: { marginTop: 40 },
-  empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
-  emptyText: { fontSize: 16, color: "#999", textAlign: "center" },
-  list: { paddingVertical: 8 },
-});
+const getStyles = (theme: typeof Colors.light) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background },
+    filterRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 6,
+      padding: 12,
+      paddingBottom: 4,
+    },
+    filterChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: theme.chipBackground,
+    },
+    filterChipActive: { backgroundColor: theme.tint },
+    filterText: { fontSize: 12, color: theme.mutedText, textTransform: "capitalize" },
+    filterTextActive: { color: theme.onTint },
+    pingSection: {
+      padding: 12,
+      alignItems: "center",
+      gap: 8,
+    },
+    pingButton: {
+      backgroundColor: theme.info,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    pingButtonText: {
+      color: theme.onTint,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    pingResult: {
+      fontSize: 12,
+      color: theme.mutedText,
+      fontStyle: "italic",
+    },
+    loader: { marginTop: 40 },
+    empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
+    emptyText: { fontSize: 16, color: theme.subtleText, textAlign: "center" },
+    list: { paddingVertical: 8 },
+  });

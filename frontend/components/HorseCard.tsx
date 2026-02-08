@@ -1,15 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
 import { Horse/*, HealthStatus */} from "@/lib/types";
 
+import Colors from "@/constants/Colors";
 /*
-const STATUS_COLORS: Record<HealthStatus, string> = {
-  [HealthStatus.healthy]: "#4CAF50",
-  [HealthStatus.needs_attention]: "#FF9800",
-  [HealthStatus.critical]: "#F44336",
-  [HealthStatus.palliative]: "#9C27B0",
-};
-
 const STATUS_LABELS: Record<HealthStatus, string> = {
   [HealthStatus.healthy]: "Healthy",
   [HealthStatus.needs_attention]: "Needs Attention",
@@ -19,6 +13,17 @@ const STATUS_LABELS: Record<HealthStatus, string> = {
 */
 export default function HorseCard({ horse }: { horse: Horse }) {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+/*
+  const statusColors: Record<HealthStatus, string> = {
+    [HealthStatus.healthy]: theme.healthy,
+    [HealthStatus.needs_attention]: theme.needs_attention,
+    [HealthStatus.critical]: theme.critical,
+    [HealthStatus.palliative]: theme.palliative,
+  };
+*/
+  const styles = getStyles(theme);
 
   return (
     <Pressable
@@ -50,32 +55,33 @@ export default function HorseCard({ horse }: { horse: Horse }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  info: { flex: 1 },
-  name: { fontSize: 18, fontWeight: "700", color: "#333", marginBottom: 4 },
-  detail: { fontSize: 14, color: "#666", marginBottom: 2 },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 8,
-  },
-  badgeText: { color: "#fff", fontSize: 12, fontWeight: "600" },
-});
+const getStyles = (theme: typeof Colors.light) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: 12,
+      padding: 16,
+      marginHorizontal: 16,
+      marginVertical: 6,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    info: { flex: 1 },
+    name: { fontSize: 18, fontWeight: "700", color: theme.text, marginBottom: 4 },
+    detail: { fontSize: 14, color: theme.mutedText, marginBottom: 2 },
+    badge: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+      marginLeft: 8,
+    },
+    badgeText: { color: theme.onTint, fontSize: 12, fontWeight: "600" },
+  });
