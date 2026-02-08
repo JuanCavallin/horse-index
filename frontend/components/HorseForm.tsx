@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   View,
   Alert,
   Platform,
+  useColorScheme,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
@@ -18,6 +19,7 @@ import {
   NewMedicalRecord,
   RecordType,
 } from "@/lib/types";
+import Colors from "@/constants/Colors";
 
 const HEALTH_OPTIONS = Object.values(HealthStatus);
 const GENDER_OPTIONS = ["Mare", "Gelding"];
@@ -42,10 +44,14 @@ function ToggleRow({
   label,
   value,
   onValueChange,
+  styles,
+  theme,
 }: {
   label: string;
   value: boolean;
   onValueChange: (v: boolean) => void;
+  styles: ReturnType<typeof getStyles>;
+  theme: typeof Colors.light;
 }) {
   return (
     <View style={styles.toggleRow}>
@@ -53,8 +59,8 @@ function ToggleRow({
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: "#ddd", true: "#8B4513" }}
-        thumbColor={value ? "#fff" : "#f4f3f4"}
+        trackColor={{ false: theme.border, true: theme.tint }}
+        thumbColor={value ? theme.onTint : theme.surface}
       />
     </View>
   );
@@ -65,6 +71,10 @@ export default function HorseForm({
   onSubmit,
   submitLabel = "Save",
 }: HorseFormProps) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const styles = useMemo(() => getStyles(theme), [theme]);
+
   // Basic info
   const [name, setName] = useState(initialValues?.name ?? "");
   const [breed, setBreed] = useState(initialValues?.breed ?? ""); //TODO: turn breed into dropdown with huge list of breeds and option for admin to add breeds to list in backend
@@ -326,20 +336,20 @@ export default function HorseForm({
       <View style={styles.sectionDivider} />
       <Text style={styles.sectionTitle}>Medical Conditions</Text>
 
-      <ToggleRow label="Heart Murmur" value={heartMurmul} onValueChange={setHeartMurmul} />
-      <ToggleRow label="Cushings" value={cushings} onValueChange={setCushings} />
-      <ToggleRow label="Heaves" value={heaves} onValueChange={setHeaves} />
-      <ToggleRow label="Anhidrosis" value={anhidrosis} onValueChange={setAnhidrosis} />
-      <ToggleRow label="Shivers" value={shivers} onValueChange={setShivers} />
-      <ToggleRow label="Regular Treatment" value={regularTreatment} onValueChange={setRegularTreatment} />
+      <ToggleRow label="Heart Murmur" value={heartMurmul} onValueChange={setHeartMurmul} styles={styles} theme={theme} />
+      <ToggleRow label="Cushings" value={cushings} onValueChange={setCushings} styles={styles} theme={theme} />
+      <ToggleRow label="Heaves" value={heaves} onValueChange={setHeaves} styles={styles} theme={theme} />
+      <ToggleRow label="Anhidrosis" value={anhidrosis} onValueChange={setAnhidrosis} styles={styles} theme={theme} />
+      <ToggleRow label="Shivers" value={shivers} onValueChange={setShivers} styles={styles} theme={theme} />
+      <ToggleRow label="Regular Treatment" value={regularTreatment} onValueChange={setRegularTreatment} styles={styles} theme={theme} />
 
       {/* === Behavioral === */}
       <View style={styles.sectionDivider} />
       <Text style={styles.sectionTitle}>Behavioral</Text>
 
-      <ToggleRow label="Bites" value={bites} onValueChange={setBites} />
-      <ToggleRow label="Kicks" value={kicks} onValueChange={setKicks} />
-      <ToggleRow label="Hard to Catch" value={hardToCatch} onValueChange={setHardToCatch} />
+      <ToggleRow label="Bites" value={bites} onValueChange={setBites} styles={styles} theme={theme} />
+      <ToggleRow label="Kicks" value={kicks} onValueChange={setKicks} styles={styles} theme={theme} />
+      <ToggleRow label="Hard to Catch" value={hardToCatch} onValueChange={setHardToCatch} styles={styles} theme={theme} />
 
       <Text style={styles.label}>Behavior Notes</Text>
       <TextInput
@@ -355,21 +365,21 @@ export default function HorseForm({
       <View style={styles.sectionDivider} />
       <Text style={styles.sectionTitle}>Care Needs</Text>
 
-      <ToggleRow label="Problem with Needles" value={problemNeedles} onValueChange={setProblemNeedles} />
-      <ToggleRow label="Problem with Farrier" value={problemFarrier} onValueChange={setProblemFarrier} />
-      <ToggleRow label="Sedation for Farrier" value={sedationFarrier} onValueChange={setSedationFarrier} />
-      <ToggleRow label="Extra Feed" value={extraFeed} onValueChange={setExtraFeed} />
-      <ToggleRow label="Extra Mash" value={extraMash} onValueChange={setExtraMash} />
+      <ToggleRow label="Problem with Needles" value={problemNeedles} onValueChange={setProblemNeedles} styles={styles} theme={theme} />
+      <ToggleRow label="Problem with Farrier" value={problemFarrier} onValueChange={setProblemFarrier} styles={styles} theme={theme} />
+      <ToggleRow label="Sedation for Farrier" value={sedationFarrier} onValueChange={setSedationFarrier} styles={styles} theme={theme} />
+      <ToggleRow label="Extra Feed" value={extraFeed} onValueChange={setExtraFeed} styles={styles} theme={theme} />
+      <ToggleRow label="Extra Mash" value={extraMash} onValueChange={setExtraMash} styles={styles} theme={theme} />
 
       {/* === Status === */}
       <View style={styles.sectionDivider} />
       <Text style={styles.sectionTitle}>Status</Text>
 
-      <ToggleRow label="Seen by Vet" value={seenByVet} onValueChange={setSeenByVet} />
-      <ToggleRow label="Seen by Farrier" value={seenByFarrier} onValueChange={setSeenByFarrier} />
-      <ToggleRow label="Military" value={military} onValueChange={setMilitary} />
-      <ToggleRow label="Race" value={race} onValueChange={setRace} />
-      <ToggleRow label="Deceased" value={deceased} onValueChange={setDeceased} />
+      <ToggleRow label="Seen by Vet" value={seenByVet} onValueChange={setSeenByVet} styles={styles} theme={theme} />
+      <ToggleRow label="Seen by Farrier" value={seenByFarrier} onValueChange={setSeenByFarrier} styles={styles} theme={theme} />
+      <ToggleRow label="Military" value={military} onValueChange={setMilitary} styles={styles} theme={theme} />
+      <ToggleRow label="Race" value={race} onValueChange={setRace} styles={styles} theme={theme} />
+      <ToggleRow label="Deceased" value={deceased} onValueChange={setDeceased} styles={styles} theme={theme} />
 
       {deceased && (
         <>
@@ -409,7 +419,7 @@ export default function HorseForm({
               <FontAwesome
                 name={TYPE_ICONS[rec.record_type]}
                 size={16}
-                color="#8B4513"
+                color={theme.tint}
                 style={styles.recordIcon}
               />
               <Text style={styles.recordType}>
@@ -417,7 +427,7 @@ export default function HorseForm({
               </Text>
               <Text style={styles.recordDate}>{rec.date}</Text>
               <Pressable onPress={() => removeRecord(index)} style={styles.removeButton}>
-                <FontAwesome name="times-circle" size={20} color="#F44336" />
+                <FontAwesome name="times-circle" size={20} color={theme.danger} />
               </Pressable>
             </View>
             <Text style={styles.recordDescription}>{rec.description}</Text>
@@ -506,102 +516,104 @@ export default function HorseForm({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 40 },
-  label: { fontSize: 14, fontWeight: "600", color: "#333", marginTop: 12, marginBottom: 4 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: "#fff",
-  },
-  textArea: { minHeight: 80, textAlignVertical: "top" },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#eee",
-  },
-  chipSelected: { backgroundColor: "#8B4513" },
-  chipText: { fontSize: 13, color: "#333" },
-  chipTextSelected: { color: "#fff" },
-  button: {
-    backgroundColor: "#8B4513",
-    borderRadius: 10,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+const getStyles = (theme: typeof Colors.light) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background },
+    content: { padding: 16, paddingBottom: 40 },
+    label: { fontSize: 14, fontWeight: "600", color: theme.text, marginTop: 12, marginBottom: 4 },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 16,
+      backgroundColor: theme.surface,
+      color: theme.text,
+    },
+    textArea: { minHeight: 80, textAlignVertical: "top" },
+    chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
+    chip: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: theme.chipBackground,
+    },
+    chipSelected: { backgroundColor: theme.tint },
+    chipText: { fontSize: 13, color: theme.text },
+    chipTextSelected: { color: theme.onTint },
+    button: {
+      backgroundColor: theme.tint,
+      borderRadius: 10,
+      padding: 16,
+      alignItems: "center",
+      marginTop: 24,
+    },
+    buttonDisabled: { opacity: 0.6 },
+    buttonText: { color: theme.onTint, fontSize: 16, fontWeight: "700" },
 
-  // Sections
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#333", marginBottom: 4 },
-  sectionDivider: { borderTopWidth: 1, borderTopColor: "#ddd", marginTop: 24, paddingTop: 16 },
+    // Sections
+    sectionTitle: { fontSize: 18, fontWeight: "700", color: theme.text, marginBottom: 4 },
+    sectionDivider: { borderTopWidth: 1, borderTopColor: theme.border, marginTop: 24, paddingTop: 16 },
 
-  // Toggle rows
-  toggleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  toggleLabel: { fontSize: 15, color: "#333" },
+    // Toggle rows
+    toggleRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+    toggleLabel: { fontSize: 15, color: theme.text },
 
-  // Medical records section
-  medicalSection: { marginTop: 24, borderTopWidth: 1, borderTopColor: "#ddd", paddingTop: 16 },
-  medicalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  addRecordButton: {
-    backgroundColor: "#8B4513",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  addRecordText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+    // Medical records section
+    medicalSection: { marginTop: 24, borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 16 },
+    medicalHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    addRecordButton: {
+      backgroundColor: theme.tint,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    addRecordText: { color: theme.onTint, fontWeight: "600", fontSize: 13 },
 
-  // Record cards
-  recordCard: {
-    backgroundColor: "#f9f6f2",
-    borderRadius: 10,
-    padding: 14,
-    marginVertical: 6,
-    borderLeftWidth: 4,
-    borderLeftColor: "#8B4513",
-  },
-  recordHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  recordIcon: { marginRight: 8 },
-  recordType: { fontSize: 13, fontWeight: "700", color: "#8B4513", flex: 1 },
-  recordDate: { fontSize: 13, color: "#888", marginRight: 8 },
-  removeButton: { padding: 4 },
-  recordDescription: { fontSize: 15, color: "#333", marginBottom: 4 },
-  recordVet: { fontSize: 13, color: "#666" },
-  recordFollowup: { fontSize: 13, color: "#FF9800", marginTop: 4 },
-  recordNotes: { fontSize: 13, color: "#888", fontStyle: "italic", marginTop: 4 },
+    // Record cards
+    recordCard: {
+      backgroundColor: theme.card,
+      borderRadius: 10,
+      padding: 14,
+      marginVertical: 6,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.tint,
+    },
+    recordHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
+    recordIcon: { marginRight: 8 },
+    recordType: { fontSize: 13, fontWeight: "700", color: theme.tint, flex: 1 },
+    recordDate: { fontSize: 13, color: theme.subtleText, marginRight: 8 },
+    removeButton: { padding: 4 },
+    recordDescription: { fontSize: 15, color: theme.text, marginBottom: 4 },
+    recordVet: { fontSize: 13, color: theme.mutedText },
+    recordFollowup: { fontSize: 13, color: theme.warning, marginTop: 4 },
+    recordNotes: { fontSize: 13, color: theme.subtleText, fontStyle: "italic", marginTop: 4 },
 
-  // Record form
-  recordFormContainer: {
-    backgroundColor: "#f9f6f2",
-    borderRadius: 10,
-    padding: 14,
-    marginTop: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: "#8B4513",
-  },
-  recordFormTitle: { fontSize: 16, fontWeight: "700", color: "#333", marginBottom: 4 },
-  recordFormActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 16 },
-  cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#eee" },
-  cancelRecordText: { fontSize: 14, color: "#666" },
-  saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#8B4513" },
-  saveRecordText: { color: "#fff", fontSize: 14, fontWeight: "700" },
-});
+    // Record form
+    recordFormContainer: {
+      backgroundColor: theme.card,
+      borderRadius: 10,
+      padding: 14,
+      marginTop: 8,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.tint,
+    },
+    recordFormTitle: { fontSize: 16, fontWeight: "700", color: theme.text, marginBottom: 4 },
+    recordFormActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 16 },
+    cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.chipBackground },
+    cancelRecordText: { fontSize: 14, color: theme.mutedText },
+    saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.tint },
+    saveRecordText: { color: theme.onTint, fontSize: 14, fontWeight: "700" },
+  });

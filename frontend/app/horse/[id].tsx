@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  useColorScheme,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -16,19 +17,22 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { horsesApi, medicalApi } from "@/lib/api";
 import { HorseWithRecords, HealthStatus, RecordType, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
-
-const STATUS_COLORS: Record<HealthStatus, string> = {
-  [HealthStatus.healthy]: "#4CAF50",
-  [HealthStatus.needs_attention]: "#FF9800",
-  [HealthStatus.critical]: "#F44336",
-  [HealthStatus.palliative]: "#9C27B0",
-};
+import Colors from "@/constants/Colors";
 
 const RECORD_TYPES = Object.values(RecordType);
 
 export default function HorseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const styles = getStyles(theme);
+  const statusColors: Record<HealthStatus, string> = {
+    [HealthStatus.healthy]: theme.healthy,
+    [HealthStatus.needs_attention]: theme.needs_attention,
+    [HealthStatus.critical]: theme.critical,
+    [HealthStatus.palliative]: theme.palliative,
+  };
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -138,7 +142,7 @@ export default function HorseDetailScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#8B4513" />
+        <ActivityIndicator size="large" color={theme.tint} />
       </View>
     );
   }
@@ -146,7 +150,7 @@ export default function HorseDetailScreen() {
   if (!horse) {
     return (
       <View style={styles.center}>
-        <Text>Horse not found.</Text>
+        <Text style={styles.emptyText}>Horse not found.</Text>
       </View>
     );
   }
@@ -158,7 +162,7 @@ export default function HorseDetailScreen() {
         <View
           style={[
             styles.badge,
-            { backgroundColor: STATUS_COLORS[horse.health_status] },
+            { backgroundColor: statusColors[horse.health_status] },
           ]}
         >
           <Text style={styles.badgeText}>
@@ -168,11 +172,11 @@ export default function HorseDetailScreen() {
       </View>
 
       <View style={styles.detailGrid}>
-        <DetailRow label="Breed" value={horse.breed} />
-        <DetailRow label="Age" value={`${horse.age} years`} />
-        <DetailRow label="Gender" value={horse.gender} />
-        <DetailRow label="Color" value={horse.color} />
-        <DetailRow label="Arrived" value={horse.arrival_date} />
+        <DetailRow label="Breed" value={horse.breed} styles={styles} />
+        <DetailRow label="Age" value={`${horse.age} years`} styles={styles} />
+        <DetailRow label="Gender" value={horse.gender} styles={styles} />
+        <DetailRow label="Color" value={horse.color} styles={styles} />
+        <DetailRow label="Arrived" value={horse.arrival_date} styles={styles} />
       </View>
 
       {horse.behavior_notes && (
@@ -293,7 +297,7 @@ export default function HorseDetailScreen() {
                 style={styles.deleteRecordButton}
                 onPress={() => confirmDeleteRecord(r.id)}
               >
-                <FontAwesome name="trash-o" size={14} color="#F44336" />
+                <FontAwesome name="trash-o" size={14} color={theme.danger} />
                 <Text style={styles.deleteRecordText}>Delete</Text>
               </Pressable>
             </View>
@@ -304,7 +308,7 @@ export default function HorseDetailScreen() {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value, styles }: { label: string; value: string; styles: any }) {
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -313,8 +317,8 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
+const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.background },
   content: { padding: 16, paddingBottom: 40 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
@@ -323,11 +327,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  name: { fontSize: 28, fontWeight: "800", color: "#333" },
+  name: { fontSize: 28, fontWeight: "800", color: theme.text },
   badge: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14 },
-  badgeText: { color: "#fff", fontSize: 13, fontWeight: "600", textTransform: "capitalize" },
+  badgeText: { color: theme.onTint, fontSize: 13, fontWeight: "600", textTransform: "capitalize" },
   detailGrid: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
@@ -337,30 +341,30 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: theme.border,
   },
-  detailLabel: { fontSize: 14, color: "#888" },
-  detailValue: { fontSize: 14, fontWeight: "600", color: "#333" },
+  detailLabel: { fontSize: 14, color: theme.mutedText },
+  detailValue: { fontSize: 14, fontWeight: "600", color: theme.text },
   notesSection: { marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#333", marginBottom: 8 },
-  notes: { fontSize: 15, color: "#555", lineHeight: 22 },
+  sectionTitle: { fontSize: 18, fontWeight: "700", color: theme.text, marginBottom: 8 },
+  notes: { fontSize: 15, color: theme.subtleText, lineHeight: 22 },
   actions: { flexDirection: "row", gap: 12, marginBottom: 24 },
   editButton: {
     flex: 1,
-    backgroundColor: "#8B4513",
+    backgroundColor: theme.tint,
     padding: 14,
     borderRadius: 10,
     alignItems: "center",
   },
-  editButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  editButtonText: { color: theme.onTint, fontWeight: "700", fontSize: 15 },
   deleteButton: {
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 10,
-    backgroundColor: "#F44336",
+    backgroundColor: theme.danger,
     alignItems: "center",
   },
-  deleteButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  deleteButtonText: { color: theme.onTint, fontWeight: "700", fontSize: 15 },
   medicalSection: { marginTop: 8 },
   medicalHeader: {
     flexDirection: "row",
@@ -369,13 +373,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   addRecordButton: {
-    backgroundColor: "#8B4513",
+    backgroundColor: theme.tint,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
   },
-  addRecordText: { color: "#fff", fontWeight: "600", fontSize: 13 },
-  emptyText: { fontSize: 14, color: "#999", fontStyle: "italic" },
+  addRecordText: { color: theme.onTint, fontWeight: "600", fontSize: 13 },
+  emptyText: { fontSize: 14, color: theme.subtleText, fontStyle: "italic" },
 
   // Delete record button
   deleteRecordButton: {
@@ -387,26 +391,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 4,
   },
-  deleteRecordText: { fontSize: 12, color: "#F44336" },
+  deleteRecordText: { fontSize: 12, color: theme.danger },
 
   // Inline record form
   recordFormContainer: {
-    backgroundColor: "#f9f6f2",
+    backgroundColor: theme.surface,
     borderRadius: 10,
     padding: 14,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#8B4513",
+    borderLeftColor: theme.tint,
   },
-  recordFormTitle: { fontSize: 16, fontWeight: "700", color: "#333", marginBottom: 4 },
-  formLabel: { fontSize: 14, fontWeight: "600", color: "#333", marginTop: 12, marginBottom: 4 },
+  recordFormTitle: { fontSize: 16, fontWeight: "700", color: theme.text, marginBottom: 4 },
+  formLabel: { fontSize: 14, fontWeight: "600", color: theme.text, marginTop: 12, marginBottom: 4 },
   formInput: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: theme.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: "#fff",
+    backgroundColor: theme.card,
+    color: theme.text,
   },
   textArea: { minHeight: 70, textAlignVertical: "top" },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
@@ -414,15 +419,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#eee",
+    backgroundColor: theme.chipBackground,
   },
-  chipSelected: { backgroundColor: "#8B4513" },
-  chipText: { fontSize: 13, color: "#333" },
-  chipTextSelected: { color: "#fff" },
+  chipSelected: { backgroundColor: theme.tint },
+  chipText: { fontSize: 13, color: theme.text },
+  chipTextSelected: { color: theme.onTint },
   recordFormActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 16 },
-  cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#eee" },
-  cancelRecordText: { fontSize: 14, color: "#666" },
-  saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: "#8B4513" },
-  saveRecordText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.chipBackground },
+  cancelRecordText: { fontSize: 14, color: theme.mutedText },
+  saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.tint },
+  saveRecordText: { color: theme.onTint, fontSize: 14, fontWeight: "700" },
   buttonDisabled: { opacity: 0.6 },
 });
