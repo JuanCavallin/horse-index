@@ -170,15 +170,22 @@ export default function HorseDetailScreen() {
       <View style={styles.detailGrid}>
         <DetailRow label="Breed" value={horse.breed} />
         <DetailRow label="Age" value={`${horse.age} years`} />
-        <DetailRow label="Sex" value={horse.sex} />
+        <DetailRow label="Gender" value={horse.gender} />
         <DetailRow label="Color" value={horse.color} />
         <DetailRow label="Arrived" value={horse.arrival_date} />
       </View>
 
-      {horse.notes && (
+      {horse.behavior_notes && (
         <View style={styles.notesSection}>
-          <Text style={styles.sectionTitle}>Notes</Text>
-          <Text style={styles.notes}>{horse.notes}</Text>
+          <Text style={styles.sectionTitle}>Behavior Notes</Text>
+          <Text style={styles.notes}>{horse.behavior_notes}</Text>
+        </View>
+      )}
+
+      {horse.medical_notes && (
+        <View style={styles.notesSection}>
+          <Text style={styles.sectionTitle}>Medical Notes</Text>
+          <Text style={styles.notes}>{horse.medical_notes}</Text>
         </View>
       )}
 

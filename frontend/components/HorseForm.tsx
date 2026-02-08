@@ -5,12 +5,14 @@ import {
   Text,
   TextInput,
   Pressable,
+  Switch,
   View,
   Alert,
   Platform,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
+  Eye,
   HealthStatus,
   HorseFormData,
   NewMedicalRecord,
@@ -18,8 +20,9 @@ import {
 } from "@/lib/types";
 
 const HEALTH_OPTIONS = Object.values(HealthStatus);
-const SEX_OPTIONS = ["Mare", "Gelding"];
+const GENDER_OPTIONS = ["Mare", "Gelding"];
 const RECORD_TYPES = Object.values(RecordType);
+const EYE_OPTIONS = Object.values(Eye);
 
 const TYPE_ICONS: Record<RecordType, React.ComponentProps<typeof FontAwesome>["name"]> = {
   [RecordType.checkup]: "stethoscope",
@@ -35,15 +38,38 @@ interface HorseFormProps {
   submitLabel?: string;
 }
 
+function ToggleRow({
+  label,
+  value,
+  onValueChange,
+}: {
+  label: string;
+  value: boolean;
+  onValueChange: (v: boolean) => void;
+}) {
+  return (
+    <View style={styles.toggleRow}>
+      <Text style={styles.toggleLabel}>{label}</Text>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: "#ddd", true: "#8B4513" }}
+        thumbColor={value ? "#fff" : "#f4f3f4"}
+      />
+    </View>
+  );
+}
+
 export default function HorseForm({
   initialValues,
   onSubmit,
   submitLabel = "Save",
 }: HorseFormProps) {
+  // Basic info
   const [name, setName] = useState(initialValues?.name ?? "");
-  const [breed, setBreed] = useState(initialValues?.breed ?? "");
+  const [breed, setBreed] = useState(initialValues?.breed ?? ""); //TODO: turn breed into dropdown with huge list of breeds and option for admin to add breeds to list in backend
   const [age, setAge] = useState(initialValues?.age?.toString() ?? "");
-  const [sex, setSex] = useState(initialValues?.sex ?? SEX_OPTIONS[0]);
+  const [gender, setGender] = useState(initialValues?.gender ?? GENDER_OPTIONS[0]);
   const [color, setColor] = useState(initialValues?.color ?? "");
   const [photoUrl, setPhotoUrl] = useState(initialValues?.photo_url ?? "");
   const [healthStatus, setHealthStatus] = useState<HealthStatus>(
@@ -52,7 +78,45 @@ export default function HorseForm({
   const [arrivalDate, setArrivalDate] = useState(
     initialValues?.arrival_date ?? new Date().toISOString().split("T")[0]
   );
-  const [notes, setNotes] = useState(initialValues?.notes ?? "");
+  const [pasture, setPasture] = useState(initialValues?.pasture ?? "");
+  const [groomingDay, setGroomingDay] = useState(initialValues?.grooming_day ?? "");
+
+  // Eye conditions
+  const [leftEye, setLeftEye] = useState<Eye | null>(initialValues?.left_eye ?? null);
+  const [rightEye, setRightEye] = useState<Eye | null>(initialValues?.right_eye ?? null);
+
+  // Medical conditions
+  const [heartMurmul, setHeartMurmul] = useState(initialValues?.heart_murmul ?? false);
+  const [cushings, setCushings] = useState(initialValues?.cushings ?? false);
+  const [heaves, setHeaves] = useState(initialValues?.heaves ?? false);
+  const [anhidrosis, setAnhidrosis] = useState(initialValues?.anhidrosis ?? false);
+  const [shivers, setShivers] = useState(initialValues?.shivers ?? false);
+  const [regularTreatment, setRegularTreatment] = useState(initialValues?.regular_treatment ?? false);
+
+  // Behavioral
+  const [bites, setBites] = useState(initialValues?.bites ?? false);
+  const [kicks, setKicks] = useState(initialValues?.kicks ?? false);
+  const [hardToCatch, setHardToCatch] = useState(initialValues?.hard_to_catch ?? false);
+
+  // Care needs
+  const [problemNeedles, setProblemNeedles] = useState(initialValues?.problem_needles ?? false);
+  const [problemFarrier, setProblemFarrier] = useState(initialValues?.problem_farrier ?? false);
+  const [sedationFarrier, setSedationFarrier] = useState(initialValues?.sedation_farrier ?? false);
+  const [extraFeed, setExtraFeed] = useState(initialValues?.extra_feed ?? false);
+  const [extraMash, setExtraMash] = useState(initialValues?.extra_mash ?? false);
+
+  // Status flags
+  const [seenByVet, setSeenByVet] = useState(initialValues?.seen_by_vet ?? false);
+  const [seenByFarrier, setSeenByFarrier] = useState(initialValues?.seen_by_farrier ?? false);
+  const [military, setMilitary] = useState(initialValues?.military ?? false);
+  const [race, setRace] = useState(initialValues?.race ?? false);
+  const [deceased, setDeceased] = useState(initialValues?.deceased ?? false);
+  const [dateOfDeath, setDateOfDeath] = useState(initialValues?.date_of_death ?? "");
+
+  // Notes
+  const [behaviorNotes, setBehaviorNotes] = useState(initialValues?.behavior_notes ?? "");
+  const [medicalNotes, setMedicalNotes] = useState(initialValues?.medical_notes ?? "");
+
   const [submitting, setSubmitting] = useState(false);
 
   // Medical records state
@@ -117,12 +181,37 @@ export default function HorseForm({
         name: name.trim(),
         breed: breed.trim(),
         age: parseInt(age, 10),
-        sex,
+        gender,
         color: color.trim(),
         photo_url: photoUrl.trim() || null,
         health_status: healthStatus,
         arrival_date: arrivalDate,
-        notes: notes.trim() || null,
+        left_eye: leftEye,
+        right_eye: rightEye,
+        heart_murmul: heartMurmul,
+        cushings,
+        heaves,
+        anhidrosis,
+        shivers,
+        bites,
+        kicks,
+        hard_to_catch: hardToCatch,
+        problem_needles: problemNeedles,
+        problem_farrier: problemFarrier,
+        sedation_farrier: sedationFarrier,
+        extra_feed: extraFeed,
+        extra_mash: extraMash,
+        seen_by_vet: seenByVet,
+        seen_by_farrier: seenByFarrier,
+        military,
+        race,
+        deceased,
+        date_of_death: dateOfDeath.trim() || null,
+        grooming_day: groomingDay.trim(),
+        pasture: pasture.trim() || null,
+        behavior_notes: behaviorNotes.trim() || null,
+        regular_treatment: regularTreatment,
+        medical_notes: medicalNotes.trim() || null,
         new_medical_records: medicalRecords.length > 0 ? medicalRecords : undefined,
       });
     } catch (e: any) {
@@ -134,6 +223,9 @@ export default function HorseForm({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* === Basic Info === */}
+      <Text style={styles.sectionTitle}>Basic Info</Text>
+
       <Text style={styles.label}>Name *</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Thunderbolt" />
 
@@ -143,15 +235,15 @@ export default function HorseForm({
       <Text style={styles.label}>Age *</Text>
       <TextInput style={styles.input} value={age} onChangeText={setAge} placeholder="e.g. 22" keyboardType="numeric" />
 
-      <Text style={styles.label}>Sex</Text>
+      <Text style={styles.label}>Gender</Text>
       <View style={styles.chipRow}>
-        {SEX_OPTIONS.map((opt) => (
+        {GENDER_OPTIONS.map((opt) => (
           <Pressable
             key={opt}
-            style={[styles.chip, sex === opt && styles.chipSelected]}
-            onPress={() => setSex(opt)}
+            style={[styles.chip, gender === opt && styles.chipSelected]}
+            onPress={() => setGender(opt)}
           >
-            <Text style={[styles.chipText, sex === opt && styles.chipTextSelected]}>
+            <Text style={[styles.chipText, gender === opt && styles.chipTextSelected]}>
               {opt}
             </Text>
           </Pressable>
@@ -182,17 +274,125 @@ export default function HorseForm({
       <Text style={styles.label}>Photo URL</Text>
       <TextInput style={styles.input} value={photoUrl} onChangeText={setPhotoUrl} placeholder="https://..." />
 
-      <Text style={styles.label}>Notes</Text>
+      <Text style={styles.label}>Pasture</Text>
+      <TextInput style={styles.input} value={pasture} onChangeText={setPasture} placeholder="e.g. North Field" />
+
+      <Text style={styles.label}>Grooming Day</Text>
+      <TextInput style={styles.input} value={groomingDay} onChangeText={setGroomingDay} placeholder="e.g. Monday" />
+
+      {/* === Eye Conditions === */}
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionTitle}>Eye Conditions</Text>
+
+      <Text style={styles.label}>Left Eye</Text>
+      <View style={styles.chipRow}>
+        <Pressable
+          style={[styles.chip, leftEye === null && styles.chipSelected]}
+          onPress={() => setLeftEye(null)}
+        >
+          <Text style={[styles.chipText, leftEye === null && styles.chipTextSelected]}>Normal</Text>
+        </Pressable>
+        {EYE_OPTIONS.map((opt) => (
+          <Pressable
+            key={opt}
+            style={[styles.chip, leftEye === opt && styles.chipSelected]}
+            onPress={() => setLeftEye(opt)}
+          >
+            <Text style={[styles.chipText, leftEye === opt && styles.chipTextSelected]}>{opt}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text style={styles.label}>Right Eye</Text>
+      <View style={styles.chipRow}>
+        <Pressable
+          style={[styles.chip, rightEye === null && styles.chipSelected]}
+          onPress={() => setRightEye(null)}
+        >
+          <Text style={[styles.chipText, rightEye === null && styles.chipTextSelected]}>Normal</Text>
+        </Pressable>
+        {EYE_OPTIONS.map((opt) => (
+          <Pressable
+            key={opt}
+            style={[styles.chip, rightEye === opt && styles.chipSelected]}
+            onPress={() => setRightEye(opt)}
+          >
+            <Text style={[styles.chipText, rightEye === opt && styles.chipTextSelected]}>{opt}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* === Medical Conditions === */}
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionTitle}>Medical Conditions</Text>
+
+      <ToggleRow label="Heart Murmur" value={heartMurmul} onValueChange={setHeartMurmul} />
+      <ToggleRow label="Cushings" value={cushings} onValueChange={setCushings} />
+      <ToggleRow label="Heaves" value={heaves} onValueChange={setHeaves} />
+      <ToggleRow label="Anhidrosis" value={anhidrosis} onValueChange={setAnhidrosis} />
+      <ToggleRow label="Shivers" value={shivers} onValueChange={setShivers} />
+      <ToggleRow label="Regular Treatment" value={regularTreatment} onValueChange={setRegularTreatment} />
+
+      {/* === Behavioral === */}
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionTitle}>Behavioral</Text>
+
+      <ToggleRow label="Bites" value={bites} onValueChange={setBites} />
+      <ToggleRow label="Kicks" value={kicks} onValueChange={setKicks} />
+      <ToggleRow label="Hard to Catch" value={hardToCatch} onValueChange={setHardToCatch} />
+
+      <Text style={styles.label}>Behavior Notes</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
-        value={notes}
-        onChangeText={setNotes}
-        placeholder="Any additional notes..."
+        value={behaviorNotes}
+        onChangeText={setBehaviorNotes}
+        placeholder="Any behavioral notes..."
+        multiline
+        numberOfLines={3}
+      />
+
+      {/* === Care Needs === */}
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionTitle}>Care Needs</Text>
+
+      <ToggleRow label="Problem with Needles" value={problemNeedles} onValueChange={setProblemNeedles} />
+      <ToggleRow label="Problem with Farrier" value={problemFarrier} onValueChange={setProblemFarrier} />
+      <ToggleRow label="Sedation for Farrier" value={sedationFarrier} onValueChange={setSedationFarrier} />
+      <ToggleRow label="Extra Feed" value={extraFeed} onValueChange={setExtraFeed} />
+      <ToggleRow label="Extra Mash" value={extraMash} onValueChange={setExtraMash} />
+
+      {/* === Status === */}
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionTitle}>Status</Text>
+
+      <ToggleRow label="Seen by Vet" value={seenByVet} onValueChange={setSeenByVet} />
+      <ToggleRow label="Seen by Farrier" value={seenByFarrier} onValueChange={setSeenByFarrier} />
+      <ToggleRow label="Military" value={military} onValueChange={setMilitary} />
+      <ToggleRow label="Race" value={race} onValueChange={setRace} />
+      <ToggleRow label="Deceased" value={deceased} onValueChange={setDeceased} />
+
+      {deceased && (
+        <>
+          <Text style={styles.label}>Date of Death (YYYY-MM-DD)</Text>
+          <TextInput style={styles.input} value={dateOfDeath} onChangeText={setDateOfDeath} placeholder="2025-01-15" />
+        </>
+      )}
+
+      {/* === Medical Notes === */}
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionTitle}>Notes</Text>
+
+      <Text style={styles.label}>Medical Notes</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        value={medicalNotes}
+        onChangeText={setMedicalNotes}
+        placeholder="Any medical notes..."
         multiline
         numberOfLines={4}
       />
 
-      {/* Medical Records Section */}
+      {/* === Medical Records === */}
       <View style={styles.medicalSection}>
         <View style={styles.medicalHeader}>
           <Text style={styles.sectionTitle}>Medical Records</Text>
@@ -339,6 +539,21 @@ const styles = StyleSheet.create({
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 
+  // Sections
+  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#333", marginBottom: 4 },
+  sectionDivider: { borderTopWidth: 1, borderTopColor: "#ddd", marginTop: 24, paddingTop: 16 },
+
+  // Toggle rows
+  toggleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  toggleLabel: { fontSize: 15, color: "#333" },
+
   // Medical records section
   medicalSection: { marginTop: 24, borderTopWidth: 1, borderTopColor: "#ddd", paddingTop: 16 },
   medicalHeader: {
@@ -347,7 +562,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#333" },
   addRecordButton: {
     backgroundColor: "#8B4513",
     paddingHorizontal: 14,

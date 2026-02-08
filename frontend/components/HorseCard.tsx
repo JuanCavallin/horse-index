@@ -30,7 +30,7 @@ export default function HorseCard({ horse }: { horse: Horse }) {
           <Text style={styles.detail}>
             {horse.breed} &middot; {horse.age} yrs &middot; {horse.color}
           </Text>
-          <Text style={styles.detail}>Sex: {horse.sex}</Text>
+          <Text style={styles.detail}>Gender: {horse.gender}</Text>
         </View>
         <View
           style={[

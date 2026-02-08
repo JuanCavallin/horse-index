@@ -1,3 +1,4 @@
+import { create } from "react-native/types_generated/Libraries/ReactNative/ReactFabricPublicInstance/ReactNativeAttributePayload";
 import {
   Horse,
   HorseWithRecords,
@@ -6,6 +7,7 @@ import {
   MedicalRecord,
   MedicalRecordCreate,
   MedicalRecordUpdate,
+  AuditLog
 } from "./types";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
@@ -58,3 +60,16 @@ export const medicalApi = {
   delete: (id: number) =>
     request<void>(`/medical-records/${id}`, { method: "DELETE" }),
 };
+
+//TODO: api for tasks, users
+
+//TODO: unlikely but may want to add update and delete for logs
+export const auditApi = {
+  list: () => request<AuditLog[]>(`/audit_logs`),
+  get: (id: number) => request<AuditLog>(`/audit_logs/${id}`),
+  create: (data: Omit<AuditLog, "id" | "datetime">) =>
+    request<AuditLog>("/audit_logs/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
+}
