@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-import { horsesApi } from "@/lib/api";
-import { HorseWithRecords, HorseCreate } from "@/lib/types";
+import { horsesApi, medicalApi } from "@/lib/api";
+import { HorseWithRecords, HorseFormData } from "@/lib/types";
 import HorseForm from "@/components/HorseForm";
 
 export default function EditHorseScreen() {
@@ -24,8 +24,14 @@ export default function EditHorseScreen() {
     }, [id])
   );
 
-  const handleSubmit = async (data: HorseCreate) => {
-    await horsesApi.update(Number(id), data);
+  const handleSubmit = async (data: HorseFormData) => {
+    const { new_medical_records, ...horseData } = data;
+    await horsesApi.update(Number(id), horseData);
+    if (new_medical_records) {
+      for (const record of new_medical_records) {
+        await medicalApi.create({ ...record, horse_id: Number(id) });
+      }
+    }
     router.back();
   };
 

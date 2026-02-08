@@ -49,10 +49,6 @@ export default function RootLayout() {
           name="horse/edit/[id]"
           options={{ title: "Edit Horse" }}
         />
-        <Stack.Screen
-          name="medical/[horseId]"
-          options={{ title: "Medical Records" }}
-        />
       </Stack>
     </ThemeProvider>
   );

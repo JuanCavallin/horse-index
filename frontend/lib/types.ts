@@ -70,3 +70,9 @@ export interface MedicalRecordCreate {
 
 export interface MedicalRecordUpdate
   extends Partial<Omit<MedicalRecordCreate, "horse_id">> {}
+
+export type NewMedicalRecord = Omit<MedicalRecordCreate, "horse_id">;
+
+export interface HorseFormData extends HorseCreate {
+  new_medical_records?: NewMedicalRecord[];
+}
