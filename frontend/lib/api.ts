@@ -12,6 +12,9 @@ import {
   AuditLog,
   User,
   UserUpdate,
+  Tasks,
+  TaskCreate,
+  TaskUpdate,
 } from "./types";
 import { supabase } from "./supabase";
 
@@ -99,7 +102,25 @@ export const treatmentsApi = {
     request<void>(`/treatments/${id}`, { method: "DELETE" }),
 };
 
-//TODO: api for tasks, users
+export const tasksApi = {
+  list: () =>
+    request<(Tasks & { horse_name: string })[]>(`/daily-observations`),
+  listForHorse: (horseId: string) =>
+    request<Tasks[]>(`/daily-observations/horse/${horseId}`),
+  get: (id: string) => request<Tasks>(`/daily-observations/${id}`),
+  create: (data: TaskCreate) =>
+    request<Tasks>("/daily-observations/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id: string, data: TaskUpdate) =>
+    request<Tasks>(`/daily-observations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request<void>(`/daily-observations/${id}`, { method: "DELETE" }),
+};
 
 //TODO: unlikely but may want to add update and delete for logs
 export const auditApi = {

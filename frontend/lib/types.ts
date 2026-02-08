@@ -210,6 +210,7 @@ export interface HorseFormData extends HorseCreate {
   photoFileName?: string | null;
 }
 
+//Audit log
 export interface AuditLog {
   id: string;
   user_id: string;
@@ -219,3 +220,25 @@ export interface AuditLog {
   after_value: string | null;
   event_time: string;
 }
+
+//To-do list interface
+export interface Tasks {
+  id: string;
+  horse_id: string;
+  notes?: string | null;
+  todo_status: boolean;
+  done_status: boolean;
+  notify_staff: boolean;
+  last_updated: string;
+  updated_by: string;
+}
+
+export interface TaskCreate {
+  horse_id: string;
+  notes?: string | null;
+  todo_status: boolean;
+  done_status: boolean;
+  notify_staff: boolean;
+}
+
+export interface TaskUpdate extends Partial<TaskCreate> {}
