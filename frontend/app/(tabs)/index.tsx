@@ -14,13 +14,18 @@ import { Horse, HealthStatus } from "@/lib/types";
 import HorseCard from "@/components/HorseCard";
 import Colors from "@/constants/Colors";
 
-const FILTERS: (HealthStatus | null)[] = [
+//TODO: recreate filters with different types of treatments currently being used
+/**
+ * const FILTERS: (HealthStatus | null)[] = [
   null,
   HealthStatus.healthy,
   HealthStatus.needs_attention,
   HealthStatus.critical,
   HealthStatus.palliative,
 ];
+ * 
+ */
+
 
 export default function HorseListScreen() {
   const colorScheme = useColorScheme();
@@ -28,20 +33,20 @@ export default function HorseListScreen() {
   const styles = getStyles(theme);
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<HealthStatus | null>(null);
+  //const [filter, setFilter] = useState<HealthStatus | null>(null);
   const [pingResult, setPingResult] = useState<string>("");
 
   const loadHorses = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await horsesApi.list(filter ?? undefined);
+      const data = await horsesApi.list(/*filter ?? undefined*/);
       setHorses(data);
     } catch (e) {
       console.error("Failed to load horses:", e);
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, []);
 
   const testPing = async () => {
     try {
@@ -61,7 +66,9 @@ export default function HorseListScreen() {
   );
 
   return (
+    
     <View style={styles.container}>
+      {/*
       <View style={styles.filterRow}>
         {FILTERS.map((f) => (
           <Pressable
@@ -80,7 +87,7 @@ export default function HorseListScreen() {
           </Pressable>
         ))}
       </View>
-
+      */}
       <View style={styles.pingSection}>
         <Pressable style={styles.pingButton} onPress={testPing}>
           <Text style={styles.pingButtonText}>Test: Ping backend</Text>

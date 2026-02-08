@@ -25,33 +25,33 @@ export interface Horse {
   id: number;
   name: string;
   breed: string;
-  age: number;
+  birth_year: number;
   gender: string; //TODO: rename to gender in all files
   color: string;
   photo_url: string | null;
-  health_status: HealthStatus;
+  //health_status: HealthStatus;
   arrival_date: string;
   created_at: string;
   updated_at: string;
   left_eye: Eye | null;
   right_eye: Eye | null;
-  heart_murmul: boolean;
-  cushings: boolean;
+  heart_murmur: boolean;
+  cushings_positive: boolean;
   heaves: boolean;
   anhidrosis: boolean;
   shivers: boolean;
   bites: boolean;
   kicks: boolean;
-  hard_to_catch: boolean;
-  problem_needles: boolean;
-  problem_farrier: boolean;
-  sedation_farrier: boolean;
-  extra_feed: boolean;
-  extra_mash: boolean;
+  difficult_to_catch: boolean;
+  problem_with_needles: boolean;
+  problem_with_farrier: boolean;
+  sedation_for_farrier: boolean;
+  requires_extra_feed: boolean;
+  requires_extra_mash: boolean;
   seen_by_vet: boolean;
   seen_by_farrier: boolean;
-  military: boolean;
-  race: boolean;
+  military_police_horse: boolean;
+  ex_racehorse: boolean;
   deceased: boolean;
   date_of_death: string | null;
   grooming_day: string;
@@ -60,7 +60,7 @@ export interface Horse {
   regular_treatment: boolean;
   medical_notes: string | null;
   last_updated: string;
-  last_user_update_id: number; //TODO: should this be a number??
+  updated_by: number;
 
 }
 
@@ -71,7 +71,7 @@ export interface HorseWithRecords extends Horse {
 export interface HorseCreate {
   name: string;
   breed: string;
-  age: number;
+  birth_year: number;
   gender: string;
   color: string;
   photo_url?: string | null;
@@ -79,23 +79,23 @@ export interface HorseCreate {
   arrival_date: string;
   left_eye?: Eye | null;
   right_eye?: Eye | null;
-  heart_murmul?: boolean;
-  cushings?: boolean;
+  heart_murmur?: boolean;
+  cushings_positive?: boolean;
   heaves?: boolean;
   anhidrosis?: boolean;
   shivers?: boolean;
   bites?: boolean;
   kicks?: boolean;
-  hard_to_catch?: boolean;
-  problem_needles?: boolean;
-  problem_farrier?: boolean;
-  sedation_farrier?: boolean;
-  extra_feed?: boolean;
-  extra_mash?: boolean;
+  difficult_to_catch?: boolean;
+  problem_with_needles?: boolean;
+  problem_with_farrier?: boolean;
+  sedation_for_farrier?: boolean;
+  requires_extra_feed?: boolean;
+  requires_extra_mash?: boolean;
   seen_by_vet?: boolean;
   seen_by_farrier?: boolean;
-  military?: boolean;
-  race?: boolean;
+  military_police_horse?: boolean;
+  ex_racehorse?: boolean;
   deceased?: boolean;
   date_of_death?: string | null;
   grooming_day?: string;
@@ -162,7 +162,7 @@ export interface TreatmentRecord {
   type: TreatmentType | string;
   frequency?: string | null; // times per day, week, month, etc
   last_updated: string;
-  last_user_update_id: number; //TODO: should this be a number??
+  updated_by: number;
 }
 
 //TODO: may not be necessary since this will be a niche feature for admin to add and will be complicated to set up. Can just preconfigure with some from the database rn
@@ -187,5 +187,5 @@ export interface AuditLog {
   field_name: string;
   before_value: string | null;
   after_value: string | null;
-  datetime: string;
+  event_time: string;
 }

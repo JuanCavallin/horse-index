@@ -15,10 +15,18 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { horsesApi, medicalApi } from "@/lib/api";
-import { HorseWithRecords, HealthStatus, RecordType, MedicalRecordCreate } from "@/lib/types";
+import { HorseWithRecords, RecordType, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
 import Colors from "@/constants/Colors";
 
+/*
+const STATUS_COLORS: Record<HealthStatus, string> = {
+  [HealthStatus.healthy]: "#4CAF50",
+  [HealthStatus.needs_attention]: "#FF9800",
+  [HealthStatus.critical]: "#F44336",
+  [HealthStatus.palliative]: "#9C27B0",
+};
+*/
 const RECORD_TYPES = Object.values(RecordType);
 
 export default function HorseDetailScreen() {
@@ -27,16 +35,11 @@ export default function HorseDetailScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const styles = getStyles(theme);
-  const statusColors: Record<HealthStatus, string> = {
-    [HealthStatus.healthy]: theme.healthy,
-    [HealthStatus.needs_attention]: theme.needs_attention,
-    [HealthStatus.critical]: theme.critical,
-    [HealthStatus.palliative]: theme.palliative,
-  };
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Inline medical record form state
+  //TODO: refactor medical records to match model for documents
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [recType, setRecType] = useState<RecordType>(RecordType.checkup);
   const [recDescription, setRecDescription] = useState("");
@@ -155,25 +158,20 @@ export default function HorseDetailScreen() {
     );
   }
 
+  const calculateAge = (birthYear: number) => {
+    const currentYear = new Date().getFullYear();
+    return currentYear - birthYear;
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.name}>{horse.name}</Text>
-        <View
-          style={[
-            styles.badge,
-            { backgroundColor: statusColors[horse.health_status] },
-          ]}
-        >
-          <Text style={styles.badgeText}>
-            {horse.health_status.replace("_", " ")}
-          </Text>
-        </View>
       </View>
 
       <View style={styles.detailGrid}>
         <DetailRow label="Breed" value={horse.breed} styles={styles} />
-        <DetailRow label="Age" value={`${horse.age} years`} styles={styles} />
+        <DetailRow label="Age" value={`${calculateAge(horse.birth_year)} years`} styles={styles} />
         <DetailRow label="Gender" value={horse.gender} styles={styles} />
         <DetailRow label="Color" value={horse.color} styles={styles} />
         <DetailRow label="Arrived" value={horse.arrival_date} styles={styles} />

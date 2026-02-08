@@ -1,4 +1,3 @@
-import { create } from "react-native/types_generated/Libraries/ReactNative/ReactFabricPublicInstance/ReactNativeAttributePayload";
 import {
   Horse,
   HorseWithRecords,
@@ -67,7 +66,7 @@ export const medicalApi = {
 export const auditApi = {
   list: () => request<AuditLog[]>(`/audit_logs`),
   get: (id: number) => request<AuditLog>(`/audit_logs/${id}`),
-  create: (data: Omit<AuditLog, "id" | "datetime">) =>
+  create: (data: Omit<AuditLog, "id" | "event_time">) =>
     request<AuditLog>("/audit_logs/", {
       method: "POST",
       body: JSON.stringify(data),
