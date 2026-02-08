@@ -54,7 +54,7 @@ insert into public.medical_records (horse_id, record_type, description, vet_name
 -- =========================
 -- AUDIT LOGS
 -- =========================
-insert into public.audit_logs (user_id, table_name, field_name, before_value, after_value) values
+insert into public.audit_trail (user_id, table_name, field_name, before_value, after_value) values
   (1, 'horses', 'health_status', 'healthy', 'needs_attention'),
   (1, 'horses', 'medical_notes', null, 'Heart murmur - monitor closely.'),
   (2, 'horses', 'pasture', 'East Field', 'Barn Area'),

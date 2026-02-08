@@ -9,9 +9,11 @@ import {
   View,
   Alert,
   Platform,
+  Image,
   useColorScheme,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import * as ImagePicker from "expo-image-picker";
 import {
   Eye,
   HealthStatus,
@@ -20,6 +22,7 @@ import {
   RecordType,
 } from "@/lib/types";
 import Colors from "@/constants/Colors";
+import { supabase } from "@/lib/supabase";
 
 //const HEALTH_OPTIONS = Object.values(HealthStatus);
 const GENDER_OPTIONS = ["Mare", "Gelding"];
@@ -81,7 +84,9 @@ export default function HorseForm({
   const [birthYear, setBirthYear] = useState(initialValues?.birth_year?.toString() ?? "");
   const [gender, setGender] = useState(initialValues?.gender ?? GENDER_OPTIONS[0]);
   const [color, setColor] = useState(initialValues?.color ?? "");
-  const [photoUrl, setPhotoUrl] = useState(initialValues?.photo_url ?? "");
+  const [photoUri, setPhotoUri] = useState<string | null>(initialValues?.photo_url ?? null);
+  const [photoFileName, setPhotoFileName] = useState<string | null>(null);
+  const [photoMimeType, setPhotoMimeType] = useState<string | null>(null);
   //const [healthStatus, setHealthStatus] = useState<HealthStatus>(
   //  initialValues?.health_status ?? HealthStatus.healthy
   //);
@@ -147,6 +152,32 @@ export default function HorseForm({
     }
   };
 
+  const pickPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      showAlert("Permission", "Photo library permission is required to select an image.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.85,
+    });
+
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const asset = result.assets[0];
+    setPhotoUri(asset.uri);
+    setPhotoFileName(asset.fileName ?? `horse-${Date.now()}.jpg`);
+    setPhotoMimeType(asset.mimeType ?? "image/jpeg");
+  };
+
+  const clearPhoto = () => {
+    setPhotoUri(null);
+    setPhotoFileName(null);
+    setPhotoMimeType(null);
+  };
+
   const resetRecordForm = () => {
     setRecType(RecordType.checkup);
     setRecDescription("");
@@ -187,13 +218,33 @@ export default function HorseForm({
     }
     setSubmitting(true);
     try {
+      let photoBase64: string | null = null;
+      let photoName: string | null = null;
+
+      // Convert image to base64 if present
+      if (photoUri && !photoUri.startsWith("http")) {
+        const response = await fetch(photoUri);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        
+        await new Promise((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result as string;
+            photoBase64 = result.split(",")[1]; // Get base64 without data: prefix
+            photoName = photoFileName || "photo.jpg";
+            resolve(null);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
       await onSubmit({
         name: name.trim(),
         breed: breed.trim(),
         birth_year: parseInt(birthYear, 10),
         gender,
         color: color.trim(),
-        photo_url: photoUrl.trim() || null,
         //health_status: healthStatus,
         arrival_date: arrivalDate,
         left_eye: leftEye,
@@ -223,6 +274,9 @@ export default function HorseForm({
         regular_treatment: regularTreatment,
         medical_notes: medicalNotes.trim() || null,
         new_medical_records: medicalRecords.length > 0 ? medicalRecords : undefined,
+        // Send image as base64 to backend for upload
+        ...(photoBase64 && { photoBase64 }),
+        ...(photoName && { photoFileName: photoName }),
       });
     } catch (e: any) {
       showAlert("Error", e.message);
@@ -281,8 +335,24 @@ export default function HorseForm({
       <Text style={styles.label}>Arrival Date (YYYY-MM-DD)</Text>
       <TextInput style={styles.input} value={arrivalDate} onChangeText={setArrivalDate} placeholder="2025-01-15" />
 
-      <Text style={styles.label}>Photo URL</Text>
-      <TextInput style={styles.input} value={photoUrl} onChangeText={setPhotoUrl} placeholder="https://..." />
+      <Text style={styles.label}>Photo</Text>
+      {photoUri ? (
+        <View style={styles.photoPreviewRow}>
+          <Image source={{ uri: photoUri }} style={styles.photoPreview} />
+          <View style={styles.photoActions}>
+            <Pressable style={styles.photoButton} onPress={pickPhoto}>
+              <Text style={styles.photoButtonText}>Change Photo</Text>
+            </Pressable>
+            <Pressable style={styles.photoButtonSecondary} onPress={clearPhoto}>
+              <Text style={styles.photoButtonSecondaryText}>Remove</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        <Pressable style={styles.photoButton} onPress={pickPhoto}>
+          <Text style={styles.photoButtonText}>Upload Photo</Text>
+        </Pressable>
+      )}
 
       <Text style={styles.label}>Pasture</Text>
       <TextInput style={styles.input} value={pasture} onChangeText={setPasture} placeholder="e.g. North Field" />
@@ -550,6 +620,39 @@ const getStyles = (theme: typeof Colors.light) =>
     },
     buttonDisabled: { opacity: 0.6 },
     buttonText: { color: theme.onTint, fontSize: 16, fontWeight: "700" },
+
+    photoPreviewRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginTop: 6,
+    },
+    photoPreview: {
+      width: 96,
+      height: 96,
+      borderRadius: 10,
+      backgroundColor: theme.card,
+    },
+    photoActions: {
+      flex: 1,
+      gap: 8,
+    },
+    photoButton: {
+      backgroundColor: theme.tint,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    photoButtonText: { color: theme.onTint, fontSize: 14, fontWeight: "700" },
+    photoButtonSecondary: {
+      backgroundColor: theme.chipBackground,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    photoButtonSecondaryText: { color: theme.text, fontSize: 14, fontWeight: "600" },
 
     // Sections
     sectionTitle: { fontSize: 18, fontWeight: "700", color: theme.text, marginBottom: 4 },
