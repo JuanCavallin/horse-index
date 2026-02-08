@@ -14,16 +14,17 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { horsesApi, medicalApi } from "@/lib/api";
-import { HorseWithRecords, HealthStatus, RecordType, MedicalRecordCreate } from "@/lib/types";
+import { HorseWithRecords, /*HealthStatus,*/RecordType, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
 
+/*
 const STATUS_COLORS: Record<HealthStatus, string> = {
   [HealthStatus.healthy]: "#4CAF50",
   [HealthStatus.needs_attention]: "#FF9800",
   [HealthStatus.critical]: "#F44336",
   [HealthStatus.palliative]: "#9C27B0",
 };
-
+*/
 const RECORD_TYPES = Object.values(RecordType);
 
 export default function HorseDetailScreen() {
@@ -33,6 +34,7 @@ export default function HorseDetailScreen() {
   const [loading, setLoading] = useState(true);
 
   // Inline medical record form state
+  //TODO: refactor medical records to match model for documents
   const [showRecordForm, setShowRecordForm] = useState(false);
   const [recType, setRecType] = useState<RecordType>(RecordType.checkup);
   const [recDescription, setRecDescription] = useState("");

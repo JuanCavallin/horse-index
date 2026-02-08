@@ -92,7 +92,7 @@ export default function AuditLogListScreen() {
           renderItem={({ item }) => (
             <View style={styles.row}>
               <Text style={[styles.td, styles.tdDate]}>
-                {formatDateTime(item.datetime)}
+                {formatDateTime(item.event_time)}
               </Text>
 
               <Text style={[styles.td, styles.tdUser]} numberOfLines={1}>

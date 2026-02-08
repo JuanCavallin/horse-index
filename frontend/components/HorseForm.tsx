@@ -19,7 +19,7 @@ import {
   RecordType,
 } from "@/lib/types";
 
-const HEALTH_OPTIONS = Object.values(HealthStatus);
+//const HEALTH_OPTIONS = Object.values(HealthStatus);
 const GENDER_OPTIONS = ["Mare", "Gelding"];
 const RECORD_TYPES = Object.values(RecordType);
 const EYE_OPTIONS = Object.values(Eye);
@@ -68,13 +68,13 @@ export default function HorseForm({
   // Basic info
   const [name, setName] = useState(initialValues?.name ?? "");
   const [breed, setBreed] = useState(initialValues?.breed ?? ""); //TODO: turn breed into dropdown with huge list of breeds and option for admin to add breeds to list in backend
-  const [age, setAge] = useState(initialValues?.age?.toString() ?? "");
+  const [birthYear, setBirthYear] = useState(initialValues?.birth_year?.toString() ?? "");
   const [gender, setGender] = useState(initialValues?.gender ?? GENDER_OPTIONS[0]);
   const [color, setColor] = useState(initialValues?.color ?? "");
   const [photoUrl, setPhotoUrl] = useState(initialValues?.photo_url ?? "");
-  const [healthStatus, setHealthStatus] = useState<HealthStatus>(
-    initialValues?.health_status ?? HealthStatus.healthy
-  );
+  //const [healthStatus, setHealthStatus] = useState<HealthStatus>(
+  //  initialValues?.health_status ?? HealthStatus.healthy
+  //);
   const [arrivalDate, setArrivalDate] = useState(
     initialValues?.arrival_date ?? new Date().toISOString().split("T")[0]
   );
@@ -86,8 +86,8 @@ export default function HorseForm({
   const [rightEye, setRightEye] = useState<Eye | null>(initialValues?.right_eye ?? null);
 
   // Medical conditions
-  const [heartMurmul, setHeartMurmul] = useState(initialValues?.heart_murmul ?? false);
-  const [cushings, setCushings] = useState(initialValues?.cushings ?? false);
+  const [heartMurmur, setHeartMurmur] = useState(initialValues?.heart_murmur ?? false);
+  const [cushingsPositive, setCushingsPositive] = useState(initialValues?.cushings_positive ?? false);
   const [heaves, setHeaves] = useState(initialValues?.heaves ?? false);
   const [anhidrosis, setAnhidrosis] = useState(initialValues?.anhidrosis ?? false);
   const [shivers, setShivers] = useState(initialValues?.shivers ?? false);
@@ -96,20 +96,20 @@ export default function HorseForm({
   // Behavioral
   const [bites, setBites] = useState(initialValues?.bites ?? false);
   const [kicks, setKicks] = useState(initialValues?.kicks ?? false);
-  const [hardToCatch, setHardToCatch] = useState(initialValues?.hard_to_catch ?? false);
+  const [difficultToCatch, setDifficultToCatch] = useState(initialValues?.difficult_to_catch ?? false);
 
   // Care needs
-  const [problemNeedles, setProblemNeedles] = useState(initialValues?.problem_needles ?? false);
-  const [problemFarrier, setProblemFarrier] = useState(initialValues?.problem_farrier ?? false);
-  const [sedationFarrier, setSedationFarrier] = useState(initialValues?.sedation_farrier ?? false);
-  const [extraFeed, setExtraFeed] = useState(initialValues?.extra_feed ?? false);
-  const [extraMash, setExtraMash] = useState(initialValues?.extra_mash ?? false);
+  const [problemWithNeedles, setProblemWithNeedles] = useState(initialValues?.problem_with_needles ?? false);
+  const [problemWithFarrier, setProblemWithFarrier] = useState(initialValues?.problem_with_farrier ?? false);
+  const [sedationForFarrier, setSedationForFarrier] = useState(initialValues?.sedation_for_farrier ?? false);
+  const [requiresExtraFeed, setRequiresExtraFeed] = useState(initialValues?.requires_extra_feed ?? false);
+  const [requiresExtraMash, setRequiresExtraMash] = useState(initialValues?.requires_extra_mash ?? false);
 
   // Status flags
   const [seenByVet, setSeenByVet] = useState(initialValues?.seen_by_vet ?? false);
   const [seenByFarrier, setSeenByFarrier] = useState(initialValues?.seen_by_farrier ?? false);
-  const [military, setMilitary] = useState(initialValues?.military ?? false);
-  const [race, setRace] = useState(initialValues?.race ?? false);
+  const [militaryPoliceHorse, setMilitaryPoliceHorse] = useState(initialValues?.military_police_horse ?? false);
+  const [exRacehorse, setExRacehorse] = useState(initialValues?.ex_racehorse ?? false);
   const [deceased, setDeceased] = useState(initialValues?.deceased ?? false);
   const [dateOfDeath, setDateOfDeath] = useState(initialValues?.date_of_death ?? "");
 
@@ -171,7 +171,7 @@ export default function HorseForm({
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !breed.trim() || !age.trim() || !color.trim()) {
+    if (!name.trim() || !breed.trim() || !birthYear.trim() || !color.trim()) {
       showAlert("Validation", "Please fill in all required fields.");
       return;
     }
@@ -180,31 +180,31 @@ export default function HorseForm({
       await onSubmit({
         name: name.trim(),
         breed: breed.trim(),
-        age: parseInt(age, 10),
+        birth_year: parseInt(birthYear, 10),
         gender,
         color: color.trim(),
         photo_url: photoUrl.trim() || null,
-        health_status: healthStatus,
+        //health_status: healthStatus,
         arrival_date: arrivalDate,
         left_eye: leftEye,
         right_eye: rightEye,
-        heart_murmul: heartMurmul,
-        cushings,
+        heart_murmur: heartMurmur,
+        cushings_positive: cushingsPositive,
         heaves,
         anhidrosis,
         shivers,
         bites,
         kicks,
-        hard_to_catch: hardToCatch,
-        problem_needles: problemNeedles,
-        problem_farrier: problemFarrier,
-        sedation_farrier: sedationFarrier,
-        extra_feed: extraFeed,
-        extra_mash: extraMash,
+        difficult_to_catch: difficultToCatch,
+        problem_with_needles: problemWithNeedles,
+        problem_with_farrier: problemWithFarrier,
+        sedation_for_farrier: sedationForFarrier,
+        requires_extra_feed: requiresExtraFeed,
+        requires_extra_mash: requiresExtraMash,
         seen_by_vet: seenByVet,
         seen_by_farrier: seenByFarrier,
-        military,
-        race,
+        military_police_horse: militaryPoliceHorse,
+        ex_racehorse: exRacehorse,
         deceased,
         date_of_death: dateOfDeath.trim() || null,
         grooming_day: groomingDay.trim(),
@@ -232,8 +232,8 @@ export default function HorseForm({
       <Text style={styles.label}>Breed *</Text>
       <TextInput style={styles.input} value={breed} onChangeText={setBreed} placeholder="e.g. Quarter Horse" />
 
-      <Text style={styles.label}>Age *</Text>
-      <TextInput style={styles.input} value={age} onChangeText={setAge} placeholder="e.g. 22" keyboardType="numeric" />
+      <Text style={styles.label}>Birth Year *</Text>
+      <TextInput style={styles.input} value={birthYear} onChangeText={setBirthYear} placeholder="e.g. 2003" keyboardType="numeric" />
 
       <Text style={styles.label}>Gender</Text>
       <View style={styles.chipRow}>
@@ -252,7 +252,7 @@ export default function HorseForm({
 
       <Text style={styles.label}>Color *</Text>
       <TextInput style={styles.input} value={color} onChangeText={setColor} placeholder="e.g. Bay" />
-
+      {/*}  
       <Text style={styles.label}>Health Status</Text>
       <View style={styles.chipRow}>
         {HEALTH_OPTIONS.map((opt) => (
@@ -267,7 +267,7 @@ export default function HorseForm({
           </Pressable>
         ))}
       </View>
-
+        */}
       <Text style={styles.label}>Arrival Date (YYYY-MM-DD)</Text>
       <TextInput style={styles.input} value={arrivalDate} onChangeText={setArrivalDate} placeholder="2025-01-15" />
 
@@ -326,8 +326,8 @@ export default function HorseForm({
       <View style={styles.sectionDivider} />
       <Text style={styles.sectionTitle}>Medical Conditions</Text>
 
-      <ToggleRow label="Heart Murmur" value={heartMurmul} onValueChange={setHeartMurmul} />
-      <ToggleRow label="Cushings" value={cushings} onValueChange={setCushings} />
+      <ToggleRow label="Heart Murmur" value={heartMurmur} onValueChange={setHeartMurmur} />
+      <ToggleRow label="Cushings" value={cushingsPositive} onValueChange={setCushingsPositive} />
       <ToggleRow label="Heaves" value={heaves} onValueChange={setHeaves} />
       <ToggleRow label="Anhidrosis" value={anhidrosis} onValueChange={setAnhidrosis} />
       <ToggleRow label="Shivers" value={shivers} onValueChange={setShivers} />
@@ -339,7 +339,7 @@ export default function HorseForm({
 
       <ToggleRow label="Bites" value={bites} onValueChange={setBites} />
       <ToggleRow label="Kicks" value={kicks} onValueChange={setKicks} />
-      <ToggleRow label="Hard to Catch" value={hardToCatch} onValueChange={setHardToCatch} />
+      <ToggleRow label="Difficult to Catch" value={difficultToCatch} onValueChange={setDifficultToCatch} />
 
       <Text style={styles.label}>Behavior Notes</Text>
       <TextInput
@@ -355,11 +355,11 @@ export default function HorseForm({
       <View style={styles.sectionDivider} />
       <Text style={styles.sectionTitle}>Care Needs</Text>
 
-      <ToggleRow label="Problem with Needles" value={problemNeedles} onValueChange={setProblemNeedles} />
-      <ToggleRow label="Problem with Farrier" value={problemFarrier} onValueChange={setProblemFarrier} />
-      <ToggleRow label="Sedation for Farrier" value={sedationFarrier} onValueChange={setSedationFarrier} />
-      <ToggleRow label="Extra Feed" value={extraFeed} onValueChange={setExtraFeed} />
-      <ToggleRow label="Extra Mash" value={extraMash} onValueChange={setExtraMash} />
+      <ToggleRow label="Problem with Needles" value={problemWithNeedles} onValueChange={setProblemWithNeedles} />
+      <ToggleRow label="Problem with Farrier" value={problemWithFarrier} onValueChange={setProblemWithFarrier} />
+      <ToggleRow label="Sedation for Farrier" value={sedationForFarrier} onValueChange={setSedationForFarrier} />
+      <ToggleRow label="Requires Extra Feed" value={requiresExtraFeed} onValueChange={setRequiresExtraFeed} />
+      <ToggleRow label="Requires Extra Mash" value={requiresExtraMash} onValueChange={setRequiresExtraMash} />
 
       {/* === Status === */}
       <View style={styles.sectionDivider} />
@@ -367,8 +367,8 @@ export default function HorseForm({
 
       <ToggleRow label="Seen by Vet" value={seenByVet} onValueChange={setSeenByVet} />
       <ToggleRow label="Seen by Farrier" value={seenByFarrier} onValueChange={setSeenByFarrier} />
-      <ToggleRow label="Military" value={military} onValueChange={setMilitary} />
-      <ToggleRow label="Race" value={race} onValueChange={setRace} />
+      <ToggleRow label="Military/Police Horse" value={militaryPoliceHorse} onValueChange={setMilitaryPoliceHorse} />
+      <ToggleRow label="Ex-Racehorse" value={exRacehorse} onValueChange={setExRacehorse} />
       <ToggleRow label="Deceased" value={deceased} onValueChange={setDeceased} />
 
       {deceased && (
