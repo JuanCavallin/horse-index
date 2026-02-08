@@ -33,5 +33,10 @@ web-build/
 # Docker
 docker-compose.override.yml
 
+# Firebase / Credentials
+horse-inde-firebase-adminsdk-fbsvc-551a86e6ad.json
+horse-index-release-key.jks
+google-services.json
+
 # OS
 Thumbs.db
