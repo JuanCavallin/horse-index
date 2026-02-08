@@ -7,7 +7,7 @@ const router = Router();
 router.get("/", async (_req, res) => {
   try {
     const { data, error } = await supabase
-      .from("audit_logs")
+      .from("audit_trail")
       .select("*")
       .order("event_time", { ascending: false });
 
@@ -25,7 +25,7 @@ router.get("/:id", async (req, res) => {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from("audit_logs")
+      .from("audit_trail")
       .select("*")
       .eq("id", id)
       .single();
@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
     }
 
     const { data, error } = await supabase
-      .from("audit_logs")
+      .from("audit_trail")
       .insert({ user_id, table_name, field_name, before_value, after_value })
       .select()
       .single();
