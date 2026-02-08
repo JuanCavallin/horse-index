@@ -188,6 +188,7 @@ export default function HorseDetailScreen() {
         <DetailRow label="Gender" value={horse.gender} styles={styles} />
         <DetailRow label="Color" value={horse.color} styles={styles} />
         <DetailRow label="Arrived" value={horse.arrival_date} styles={styles} />
+        <DetailRow label="Pasture" value={horse.pasture || "Not set"} styles={styles} />
       </View>
 
       {horse.behavior_notes && (

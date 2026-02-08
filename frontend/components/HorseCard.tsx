@@ -11,7 +11,13 @@ const STATUS_LABELS: Record<HealthStatus, string> = {
   [HealthStatus.palliative]: "Palliative",
 };
 */
-export default function HorseCard({ horse }: { horse: Horse }) {
+
+interface HorseCardProps {
+  horse: Horse;
+  showArchiveStatus?: boolean;
+}
+
+export default function HorseCard({ horse, showArchiveStatus = false }: HorseCardProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -24,6 +30,8 @@ export default function HorseCard({ horse }: { horse: Horse }) {
   };
 */
   const styles = getStyles(theme);
+
+  const isArchived = showArchiveStatus && horse.deceased;
 
   return (
     <Pressable
@@ -48,13 +56,13 @@ export default function HorseCard({ horse }: { horse: Horse }) {
         <View
           style={[
             styles.badge,
-            { backgroundColor: "#9CD479" },
+            { backgroundColor: isArchived ? theme.warning : theme.healthy },
               /*{ backgroundColor: STATUS_COLORS[horse.health_status] },*/
           ]}
         >
           <Text style={styles.badgeText}>
             {/*{STATUS_LABELS[horse.health_status]}*/}
-            Healthy
+            {isArchived ? "Archived" : "Healthy"}
           </Text>
         </View>
       </View>
