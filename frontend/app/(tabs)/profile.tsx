@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
   ActivityIndicator,
   useColorScheme,
 } from "react-native";
@@ -14,6 +15,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Colors from "@/constants/Colors";
 import { useUser } from "@/lib/UserContext";
 import { UserRole } from "@/lib/types";
+import { horsesApi } from "@/lib/api";
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
@@ -83,7 +85,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <FontAwesome name="user-circle" size={80} color={theme.tint} />
         <Text style={styles.headerText}>Profile</Text>
@@ -227,7 +229,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -310,6 +312,7 @@ const getStyles = (theme: typeof Colors.light) =>
     },
     actionsSection: {
       padding: 20,
+      paddingBottom: 60,
       marginTop: 20,
       gap: 12,
     },
@@ -344,6 +347,34 @@ const getStyles = (theme: typeof Colors.light) =>
       color: theme.onTint,
       fontSize: 15,
       fontWeight: "700",
+    },
+    testButton: {
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 8,
+      gap: 10,
+    },
+    testButtonText: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: "600",
+    },
+    testResultBox: {
+      borderWidth: 1,
+      borderRadius: 8,
+      padding: 12,
+      marginTop: 8,
+      backgroundColor: theme.background,
+    },
+    testResultText: {
+      fontSize: 13,
+      fontWeight: "500",
     },
     logoutButton: {
       backgroundColor: theme.danger,

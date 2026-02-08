@@ -99,3 +99,19 @@ export const usersApi = {
       body: JSON.stringify(data),
     }),
 }
+
+export const pushTokensApi = {
+  register: (data: { token: string; platform?: string }) =>
+    request<void>("/push-tokens", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
+export const testApi = {
+  sendNotification: (data?: { eventKey?: string; horseName?: string }) =>
+    request<{ message: string; tokenCount: number; result: any }>("/test/send-notification", {
+      method: "POST",
+      body: JSON.stringify(data || {}),
+    }),
+};

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "659268069464",
+    "project_id": "horse-inde",
+    "storage_bucket": "horse-inde.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659268069464:android:111fd932612e28962fc22d",
+        "android_client_info": {
+          "package_name": "com.nrebolloso.horseindex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8rxoIeygM8gE6kLdvh6YLv0MF0gAur5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

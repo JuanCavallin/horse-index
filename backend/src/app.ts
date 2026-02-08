@@ -9,6 +9,8 @@ import treatmentsRouter from "./routes/treatments";
 import actionTakenRouter from "./routes/action-taken";
 import dailyObsRouter from "./routes/daily-observations";
 import auditLogsRouter from "./routes/audit-trail";
+import pushTokensRouter from "./routes/push-tokens";
+import testRouter from "./routes/test";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -27,7 +29,10 @@ app.use("/api/treatments", treatmentsRouter);
 app.use("/api/action-taken", actionTakenRouter);
 app.use("/api/daily-observations", dailyObsRouter);
 app.use("/api/audit_logs", auditLogsRouter);
+app.use("/api/push-tokens", pushTokensRouter);
+app.use("/api/test", testRouter);
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running at http://0.0.0.0:${PORT}`);
+  console.log(`Access from mobile at http://10.136.24.145:${PORT}`);
 });

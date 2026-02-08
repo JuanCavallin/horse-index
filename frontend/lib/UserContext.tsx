@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Platform } from "react-native";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { User, UserRole } from './types';
-import { usersApi } from './api';
+import { usersApi, pushTokensApi } from './api';
 import { supabase } from './supabase';
 
 interface UserContextType {
@@ -22,11 +26,62 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+async function registerForPushNotificationsAsync(): Promise<string | null> {
+  if (Constants.appOwnership === "expo") {
+    console.warn("Push notifications are disabled in Expo Go.");
+    return null;
+  }
+
+  if (!Device.isDevice) {
+    console.warn("Push notifications require a physical device.");
+    return null;
+  }
+
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  if (existingStatus !== "granted") {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== "granted") {
+    console.warn("Push notification permissions not granted.");
+    return null;
+  }
+
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+    });
+  }
+
+  try {
+    const tokenResponse = await Notifications.getExpoPushTokenAsync();
+    return tokenResponse.data;
+  } catch (err) {
+    console.warn("Push token registration skipped:", err);
+    return null;
+  }
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewerMode, setViewerMode] = useState(false);
+  const [pushRegistered, setPushRegistered] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -70,6 +125,45 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setPushRegistered(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || pushRegistered) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        console.log("🔔 Starting push token registration...");
+        const token = await registerForPushNotificationsAsync();
+        console.log("🔔 Got token:", token);
+        
+        if (!token || cancelled) {
+          console.log("🔔 No token or cancelled, skipping registration");
+          return;
+        }
+
+        console.log("🔔 Registering token with backend...");
+        await pushTokensApi.register({ token, platform: Platform.OS });
+        console.log("🔔 ✅ Push token registered successfully!");
+        
+        if (!cancelled) {
+          setPushRegistered(true);
+        }
+      } catch (err) {
+        console.error("🔔 ❌ Failed to register push token:", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, pushRegistered]);
 
   const effectiveRole = viewerMode ? UserRole.viewer : user?.role ?? null;
 
