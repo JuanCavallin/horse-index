@@ -5,13 +5,7 @@ export enum HealthStatus {
   palliative = "palliative",
 }
 
-export enum RecordType {
-  checkup = "checkup",
-  vaccination = "vaccination",
-  treatment = "treatment",
-  surgery = "surgery",
-  other = "other",
-}
+// RecordType enum removed — medical records now use a simpler document model
 
 export enum Eye {
   missing = "Missing",
@@ -136,23 +130,16 @@ export interface HorseUpdate extends Partial<HorseCreate> {}
 export interface MedicalRecord {
   id: string;
   horse_id: string;
-  record_type: RecordType;
+  photo_url: string | null;
   description: string;
-  vet_name: string;
-  date: string;
-  next_followup: string | null;
-  notes: string | null;
-  created_at: string;
+  last_updated: string;
+  updated_by: string;
 }
 
 export interface MedicalRecordCreate {
   horse_id: string;
-  record_type: RecordType;
   description: string;
-  vet_name: string;
-  date: string;
-  next_followup?: string | null;
-  notes?: string | null;
+  photo_url: string | null;
 }
 
 //Horse treatments
@@ -204,6 +191,7 @@ export type NewMedicalRecord = Omit<MedicalRecordCreate, "horse_id">;
 export interface HorseFormData extends HorseCreate {
   new_medical_records?: NewMedicalRecord[];
 }
+
 
 export interface AuditLog {
   id: string;

@@ -1,15 +1,7 @@
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { StyleSheet, Text, View, Image, useColorScheme } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { MedicalRecord, RecordType } from "@/lib/types";
+import { MedicalRecord } from "@/lib/types";
 import Colors from "@/constants/Colors";
-
-const TYPE_ICONS: Record<RecordType, React.ComponentProps<typeof FontAwesome>["name"]> = {
-  [RecordType.checkup]: "stethoscope",
-  [RecordType.vaccination]: "medkit",
-  [RecordType.treatment]: "heartbeat",
-  [RecordType.surgery]: "scissors",
-  [RecordType.other]: "file-text-o",
-};
 
 export default function MedicalRecordCard({ record }: { record: MedicalRecord }) {
   const colorScheme = useColorScheme();
@@ -20,24 +12,26 @@ export default function MedicalRecordCard({ record }: { record: MedicalRecord })
     <View style={styles.card}>
       <View style={styles.header}>
         <FontAwesome
-          name={TYPE_ICONS[record.record_type]}
+          name="file-text-o"
           size={18}
           color={theme.tint}
           style={styles.icon}
         />
-        <Text style={styles.type}>
-          {record.record_type.replace("_", " ").toUpperCase()}
+        <Text style={styles.description} numberOfLines={2}>
+          {record.description}
         </Text>
-        <Text style={styles.date}>{record.date}</Text>
       </View>
-      <Text style={styles.description}>{record.description}</Text>
-      <Text style={styles.vet}>Vet: {record.vet_name}</Text>
-      {record.next_followup && (
-        <Text style={styles.followup}>
-          Next follow-up: {record.next_followup}
-        </Text>
+      {record.photo_url && (
+        <Image
+          source={{ uri: record.photo_url }}
+          style={styles.photo}
+          resizeMode="cover"
+        />
       )}
-      {record.notes && <Text style={styles.notes}>{record.notes}</Text>}
+      <View style={styles.footer}>
+        <Text style={styles.meta}>Updated: {record.last_updated}</Text>
+        <Text style={styles.meta}>By: {record.updated_by}</Text>
+      </View>
     </View>
   );
 }
@@ -54,10 +48,16 @@ const getStyles = (theme: typeof Colors.light) =>
     },
     header: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
     icon: { marginRight: 8 },
-    type: { fontSize: 13, fontWeight: "700", color: theme.tint, flex: 1 },
-    date: { fontSize: 13, color: theme.subtleText },
-    description: { fontSize: 15, color: theme.text, marginBottom: 4 },
-    vet: { fontSize: 13, color: theme.mutedText },
-    followup: { fontSize: 13, color: theme.warning, marginTop: 4 },
-    notes: { fontSize: 13, color: theme.subtleText, fontStyle: "italic", marginTop: 4 },
+    description: { fontSize: 15, color: theme.text, flex: 1 },
+    photo: {
+      width: "100%",
+      height: 180,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    footer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    meta: { fontSize: 12, color: theme.mutedText },
   });

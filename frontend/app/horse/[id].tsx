@@ -15,19 +15,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { horsesApi, medicalApi } from "@/lib/api";
-import { HorseWithRecords, RecordType, MedicalRecordCreate } from "@/lib/types";
+import { HorseWithRecords, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
 import Colors from "@/constants/Colors";
-
-/*
-const STATUS_COLORS: Record<HealthStatus, string> = {
-  [HealthStatus.healthy]: "#4CAF50",
-  [HealthStatus.needs_attention]: "#FF9800",
-  [HealthStatus.critical]: "#F44336",
-  [HealthStatus.palliative]: "#9C27B0",
-};
-*/
-const RECORD_TYPES = Object.values(RecordType);
 
 export default function HorseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,14 +29,9 @@ export default function HorseDetailScreen() {
   const [loading, setLoading] = useState(true);
 
   // Inline medical record form state
-  //TODO: refactor medical records to match model for documents
   const [showRecordForm, setShowRecordForm] = useState(false);
-  const [recType, setRecType] = useState<RecordType>(RecordType.checkup);
   const [recDescription, setRecDescription] = useState("");
-  const [recVetName, setRecVetName] = useState("");
-  const [recDate, setRecDate] = useState(new Date().toISOString().split("T")[0]);
-  const [recFollowup, setRecFollowup] = useState("");
-  const [recNotes, setRecNotes] = useState("");
+  const [recPhotoUrl, setRecPhotoUrl] = useState("");
   const [recSubmitting, setRecSubmitting] = useState(false);
 
   const loadHorse = useCallback(() => {
@@ -100,12 +85,8 @@ export default function HorseDetailScreen() {
   };
 
   const resetRecordForm = () => {
-    setRecType(RecordType.checkup);
     setRecDescription("");
-    setRecVetName("");
-    setRecDate(new Date().toISOString().split("T")[0]);
-    setRecFollowup("");
-    setRecNotes("");
+    setRecPhotoUrl("");
   };
 
   const showAlert = (title: string, msg: string) => {
@@ -117,20 +98,16 @@ export default function HorseDetailScreen() {
   };
 
   const handleAddRecord = async () => {
-    if (!recDescription.trim() || !recVetName.trim() || !recDate.trim()) {
-      showAlert("Validation", "Please fill in description, vet name, and date.");
+    if (!recDescription.trim()) {
+      showAlert("Validation", "Please fill in a description.");
       return;
     }
     setRecSubmitting(true);
     try {
       await medicalApi.create({
         horse_id: id,
-        record_type: recType,
         description: recDescription.trim(),
-        vet_name: recVetName.trim(),
-        date: recDate,
-        next_followup: recFollowup.trim() || null,
-        notes: recNotes.trim() || null,
+        photo_url: recPhotoUrl.trim() || null,
       });
       resetRecordForm();
       setShowRecordForm(false);
@@ -220,46 +197,21 @@ export default function HorseDetailScreen() {
           <View style={styles.recordFormContainer}>
             <Text style={styles.recordFormTitle}>New Medical Record</Text>
 
-            <Text style={styles.formLabel}>Record Type</Text>
-            <View style={styles.chipRow}>
-              {RECORD_TYPES.map((t) => (
-                <Pressable
-                  key={t}
-                  style={[styles.chip, recType === t && styles.chipSelected]}
-                  onPress={() => setRecType(t)}
-                >
-                  <Text style={[styles.chipText, recType === t && styles.chipTextSelected]}>
-                    {t}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
             <Text style={styles.formLabel}>Description *</Text>
             <TextInput
               style={[styles.formInput, styles.textArea]}
               value={recDescription}
               onChangeText={setRecDescription}
-              placeholder="What was done..."
+              placeholder="Describe the record..."
               multiline
             />
 
-            <Text style={styles.formLabel}>Vet Name *</Text>
-            <TextInput style={styles.formInput} value={recVetName} onChangeText={setRecVetName} placeholder="Dr. Smith" />
-
-            <Text style={styles.formLabel}>Date (YYYY-MM-DD) *</Text>
-            <TextInput style={styles.formInput} value={recDate} onChangeText={setRecDate} placeholder="2025-06-15" />
-
-            <Text style={styles.formLabel}>Next Follow-up (YYYY-MM-DD)</Text>
-            <TextInput style={styles.formInput} value={recFollowup} onChangeText={setRecFollowup} placeholder="Optional" />
-
-            <Text style={styles.formLabel}>Notes</Text>
+            <Text style={styles.formLabel}>Photo URL</Text>
             <TextInput
-              style={[styles.formInput, styles.textArea]}
-              value={recNotes}
-              onChangeText={setRecNotes}
-              placeholder="Additional notes..."
-              multiline
+              style={styles.formInput}
+              value={recPhotoUrl}
+              onChangeText={setRecPhotoUrl}
+              placeholder="https://..."
             />
 
             <View style={styles.recordFormActions}>
@@ -412,16 +364,6 @@ const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
     color: theme.text,
   },
   textArea: { minHeight: 70, textAlignVertical: "top" },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: theme.chipBackground,
-  },
-  chipSelected: { backgroundColor: theme.tint },
-  chipText: { fontSize: 13, color: theme.text },
-  chipTextSelected: { color: theme.onTint },
   recordFormActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 16 },
   cancelRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.chipBackground },
   cancelRecordText: { fontSize: 14, color: theme.mutedText },

@@ -17,22 +17,12 @@ import {
   HealthStatus,
   HorseFormData,
   NewMedicalRecord,
-  RecordType,
 } from "@/lib/types";
 import Colors from "@/constants/Colors";
 
 //const HEALTH_OPTIONS = Object.values(HealthStatus);
 const GENDER_OPTIONS = ["Mare", "Gelding"];
-const RECORD_TYPES = Object.values(RecordType);
 const EYE_OPTIONS = Object.values(Eye);
-
-const TYPE_ICONS: Record<RecordType, React.ComponentProps<typeof FontAwesome>["name"]> = {
-  [RecordType.checkup]: "stethoscope",
-  [RecordType.vaccination]: "medkit",
-  [RecordType.treatment]: "heartbeat",
-  [RecordType.surgery]: "scissors",
-  [RecordType.other]: "file-text-o",
-};
 
 interface HorseFormProps {
   initialValues?: Partial<HorseFormData>;
@@ -132,12 +122,8 @@ export default function HorseForm({
   // Medical records state
   const [medicalRecords, setMedicalRecords] = useState<NewMedicalRecord[]>([]);
   const [showRecordForm, setShowRecordForm] = useState(false);
-  const [recType, setRecType] = useState<RecordType>(RecordType.checkup);
   const [recDescription, setRecDescription] = useState("");
-  const [recVetName, setRecVetName] = useState("");
-  const [recDate, setRecDate] = useState(new Date().toISOString().split("T")[0]);
-  const [recFollowup, setRecFollowup] = useState("");
-  const [recNotes, setRecNotes] = useState("");
+  const [recPhotoUrl, setRecPhotoUrl] = useState("");
 
   const showAlert = (title: string, msg: string) => {
     if (Platform.OS === "web") {
@@ -148,28 +134,20 @@ export default function HorseForm({
   };
 
   const resetRecordForm = () => {
-    setRecType(RecordType.checkup);
     setRecDescription("");
-    setRecVetName("");
-    setRecDate(new Date().toISOString().split("T")[0]);
-    setRecFollowup("");
-    setRecNotes("");
+    setRecPhotoUrl("");
   };
 
   const addMedicalRecord = () => {
-    if (!recDescription.trim() || !recVetName.trim() || !recDate.trim()) {
-      showAlert("Validation", "Please fill in description, vet name, and date for the medical record.");
+    if (!recDescription.trim()) {
+      showAlert("Validation", "Please fill in a description for the medical record.");
       return;
     }
     setMedicalRecords((prev) => [
       ...prev,
       {
-        record_type: recType,
         description: recDescription.trim(),
-        vet_name: recVetName.trim(),
-        date: recDate,
-        next_followup: recFollowup.trim() || null,
-        notes: recNotes.trim() || null,
+        photo_url: recPhotoUrl.trim() || null,
       },
     ]);
     resetRecordForm();
@@ -417,25 +395,21 @@ export default function HorseForm({
           <View key={index} style={styles.recordCard}>
             <View style={styles.recordHeader}>
               <FontAwesome
-                name={TYPE_ICONS[rec.record_type]}
+                name="file-text-o"
                 size={16}
                 color={theme.tint}
                 style={styles.recordIcon}
               />
-              <Text style={styles.recordType}>
-                {rec.record_type.replace("_", " ").toUpperCase()}
+              <Text style={styles.recordDescription} numberOfLines={1}>
+                {rec.description}
               </Text>
-              <Text style={styles.recordDate}>{rec.date}</Text>
               <Pressable onPress={() => removeRecord(index)} style={styles.removeButton}>
                 <FontAwesome name="times-circle" size={20} color={theme.danger} />
               </Pressable>
             </View>
-            <Text style={styles.recordDescription}>{rec.description}</Text>
-            <Text style={styles.recordVet}>Vet: {rec.vet_name}</Text>
-            {rec.next_followup && (
-              <Text style={styles.recordFollowup}>Follow-up: {rec.next_followup}</Text>
+            {rec.photo_url && (
+              <Text style={styles.recordPhotoUrl} numberOfLines={1}>Photo: {rec.photo_url}</Text>
             )}
-            {rec.notes && <Text style={styles.recordNotes}>{rec.notes}</Text>}
           </View>
         ))}
 
@@ -443,46 +417,21 @@ export default function HorseForm({
           <View style={styles.recordFormContainer}>
             <Text style={styles.recordFormTitle}>New Medical Record</Text>
 
-            <Text style={styles.label}>Record Type</Text>
-            <View style={styles.chipRow}>
-              {RECORD_TYPES.map((t) => (
-                <Pressable
-                  key={t}
-                  style={[styles.chip, recType === t && styles.chipSelected]}
-                  onPress={() => setRecType(t)}
-                >
-                  <Text style={[styles.chipText, recType === t && styles.chipTextSelected]}>
-                    {t}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
             <Text style={styles.label}>Description *</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={recDescription}
               onChangeText={setRecDescription}
-              placeholder="What was done..."
+              placeholder="Describe the record..."
               multiline
             />
 
-            <Text style={styles.label}>Vet Name *</Text>
-            <TextInput style={styles.input} value={recVetName} onChangeText={setRecVetName} placeholder="Dr. Smith" />
-
-            <Text style={styles.label}>Date (YYYY-MM-DD) *</Text>
-            <TextInput style={styles.input} value={recDate} onChangeText={setRecDate} placeholder="2025-06-15" />
-
-            <Text style={styles.label}>Next Follow-up (YYYY-MM-DD)</Text>
-            <TextInput style={styles.input} value={recFollowup} onChangeText={setRecFollowup} placeholder="Optional" />
-
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.label}>Photo URL</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
-              value={recNotes}
-              onChangeText={setRecNotes}
-              placeholder="Additional notes..."
-              multiline
+              style={styles.input}
+              value={recPhotoUrl}
+              onChangeText={setRecPhotoUrl}
+              placeholder="https://..."
             />
 
             <View style={styles.recordFormActions}>
@@ -591,15 +540,11 @@ const getStyles = (theme: typeof Colors.light) =>
       borderLeftWidth: 4,
       borderLeftColor: theme.tint,
     },
-    recordHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
+    recordHeader: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
     recordIcon: { marginRight: 8 },
-    recordType: { fontSize: 13, fontWeight: "700", color: theme.tint, flex: 1 },
-    recordDate: { fontSize: 13, color: theme.subtleText, marginRight: 8 },
     removeButton: { padding: 4 },
-    recordDescription: { fontSize: 15, color: theme.text, marginBottom: 4 },
-    recordVet: { fontSize: 13, color: theme.mutedText },
-    recordFollowup: { fontSize: 13, color: theme.warning, marginTop: 4 },
-    recordNotes: { fontSize: 13, color: theme.subtleText, fontStyle: "italic", marginTop: 4 },
+    recordDescription: { fontSize: 15, color: theme.text, flex: 1 },
+    recordPhotoUrl: { fontSize: 12, color: theme.mutedText, marginTop: 2 },
 
     // Record form
     recordFormContainer: {

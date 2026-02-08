@@ -10,10 +10,10 @@ router.get("/horse/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from("medical_records")
+      .from("documents")
       .select("*")
       .eq("horse_id", id)
-      .order("date", { ascending: false });
+      .order("last_updated", { ascending: false });
 
     if (error) throw error;
     res.json(data);
@@ -29,7 +29,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from("medical_records")
+      .from("documents")
       .select("*")
       .eq("id", id)
       .single();
@@ -51,15 +51,15 @@ router.get("/:id", authenticateToken, async (req, res) => {
 // POST /api/medical-records  — create a record
 router.post("/", authenticateToken, requireEditor, async (req, res) => {
   try {
-    const { horse_id, record_type, description, vet_name, date, next_followup, notes } = req.body;
+    const { horse_id, photo_url, description } = req.body;
 
-    if (!horse_id || !description || !vet_name || !date) {
-      return res.status(400).json({ error: "horse_id, description, vet_name, and date are required" });
+    if (!horse_id || !description) {
+      return res.status(400).json({ error: "horse_id and description are required" });
     }
 
     const { data, error } = await supabase
-      .from("medical_records")
-      .insert({ horse_id, record_type, description, vet_name, date, next_followup, notes })
+      .from("documents")
+      .insert({ horse_id, photo_url, description })
       .select()
       .single();
 
@@ -77,7 +77,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from("medical_records")
+      .from("documents")
       .update(req.body)
       .eq("id", id)
       .select()
@@ -103,7 +103,7 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
     const { id } = req.params;
 
     const { error } = await supabase
-      .from("medical_records")
+      .from("documents")
       .delete()
       .eq("id", id);
 

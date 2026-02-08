@@ -42,14 +42,14 @@ router.get("/:id", authenticateToken, async (req, res) => {
     }
 
     const { data: records, error: recError } = await supabase
-      .from("medical_records")
+      .from("documents")
       .select("*")
       .eq("horse_id", id)
-      .order("date", { ascending: false });
+      .order("last_updated", { ascending: false });
 
-    // Don't fail the whole request if medical_records table doesn't exist yet
+    // Don't fail the whole request if documents table doesn't exist yet
     if (recError) {
-      console.error("medical_records query error (non-fatal):", recError.message);
+      console.error("documents query error (non-fatal):", recError.message);
     }
 
     res.json({ ...horse, medical_records: records ?? [] });
@@ -83,9 +83,9 @@ router.post("/", authenticateToken, requireEditor, async (req, res) => {
         horse_id: horse.id,
       }));
       const { error: recError } = await supabase
-        .from("medical_records")
+        .from("documents")
         .insert(records);
-      if (recError) console.error("Failed to insert medical records:", recError);
+      if (recError) console.error("Failed to insert documents:", recError);
     }
 
     res.status(201).json(horse);
