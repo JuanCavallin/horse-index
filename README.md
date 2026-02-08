@@ -1,4 +1,11 @@
-# 🐴 Horse Index – Retirement Home for Horses  
+# 🐴 Horse Index – Retirement Home for Horses
+
+### Get Started
+
+Expo Go: `node start.js`
+
+Docker Container: `docker compose up --build`
+
 ### Code for Change 2026
 
 Horse Index is a web application built for Code for Change 2026 to support Retirement Home for Horses, Inc., a non-profit equine sanctuary located in Alachua, Florida.
@@ -33,38 +40,12 @@ Horse Index provides a centralized digital system that allows volunteers and sta
 ## Tech Stack
 
 Frontend:
-- React
+- Native React
 - TypeScript
-- CSS
 
 Backend:
-- Python
-- FastAPI
-- Uvicorn
-
+- Node.js
+- Express
+- Supabase
 ---
-
-## Project Structure
-
-horse-index/
-├── frontend/  
-│   └── react-app/  
-├── backend/  
-│   ├── main.py  
-│   └── venv/  
-└── README.md  
-
----
-
-## Getting Started (Local Development)
-
-Backend setup:
-
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install fastapi uvicorn
-uvicorn main:app --reload
-
 
