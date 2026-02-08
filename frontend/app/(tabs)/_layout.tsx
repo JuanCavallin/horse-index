@@ -1,8 +1,10 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
+import { Image, useColorScheme } from "react-native";
 
 import Colors from "@/constants/Colors";
+
+const logo = require("@/assets/images/LOGO FOR RHH.png");
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
@@ -25,8 +27,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Horses",
+          title: "Retirement Home for Horses",
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
+          headerRight: () => (
+            <Image
+              source={logo}
+              style={{ width: 40, height: 40, marginRight: 12, borderRadius: 20 }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tabs.Screen

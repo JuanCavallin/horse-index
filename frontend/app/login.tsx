@@ -1,9 +1,13 @@
 // frontend/app/login.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, useColorScheme, Platform, Pressable } from 'react-native';
 import { supabase } from '../lib/supabase'; // Make sure this path is correct
 import { useRouter } from 'expo-router';
 import Colors from "@/constants/Colors";
+import RunningHorse from "@/components/RunningHorse";
+
+// Animation phases: "top" -> "bottom" -> "waiting" -> "top" ...
+type AnimPhase = "top" | "bottom" | "waiting";
 
 export default function Login() {
   const router = useRouter();
@@ -13,6 +17,31 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Horse animation state
+  const [phase, setPhase] = useState<AnimPhase>("top");
+  const [cycleKey, setCycleKey] = useState(0); // bump to re-trigger
+  const waitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Start the first cycle
+    setPhase("top");
+    return () => {
+      if (waitTimer.current) clearTimeout(waitTimer.current);
+    };
+  }, []);
+
+  const onTopFinished = useCallback(() => {
+    setPhase("bottom");
+  }, []);
+
+  const onBottomFinished = useCallback(() => {
+    setPhase("waiting");
+    waitTimer.current = setTimeout(() => {
+      setCycleKey((k) => k + 1);
+      setPhase("top");
+    }, 5000);
+  }, []);
 
   // 1. Sign In Function
   async function signInWithEmail() {
@@ -62,6 +91,14 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
+      <RunningHorse
+        key={`top-${cycleKey}`}
+        position="top"
+        delay={0}
+        running={phase === "top"}
+        onFinished={onTopFinished}
+      />
+
       <Text style={styles.header}>Horse Index Login</Text>
       <TextInput
         style={styles.input}
@@ -86,6 +123,14 @@ export default function Login() {
       <Pressable style={styles.signUpButton} disabled={loading} onPress={signUpWithEmail}>
         <Text style={styles.signUpText}>Sign Up</Text>
       </Pressable>
+
+      <RunningHorse
+        key={`bottom-${cycleKey}`}
+        position="bottom"
+        delay={1000}
+        running={phase === "bottom"}
+        onFinished={onBottomFinished}
+      />
     </View>
   );
 }
@@ -93,12 +138,12 @@ export default function Login() {
 const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: theme.background },
   header: { fontSize: 24, marginBottom: 20, textAlign: 'center', fontWeight: 'bold', color: theme.text },
-  input: { 
-    height: 50, 
-    borderColor: theme.border, 
-    borderWidth: 1, 
-    borderRadius: 5, 
-    padding: 10, 
+  input: {
+    height: 50,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
     marginBottom: 15,
     backgroundColor: theme.card,
     color: theme.text,
