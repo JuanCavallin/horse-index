@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase";
+import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 
 // GET /api/audit_logs  — list all audit logs
-router.get("/", async (_req, res) => {
+router.get("/", authenticateToken, async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from("audit_trail")
@@ -20,7 +21,7 @@ router.get("/", async (_req, res) => {
 });
 
 // GET /api/audit_logs/:id  — single audit log
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
