@@ -18,6 +18,7 @@ import { horsesApi, medicalApi } from "@/lib/api";
 import { HorseWithRecords, RecordType, MedicalRecordCreate } from "@/lib/types";
 import MedicalRecordCard from "@/components/MedicalRecordCard";
 import Colors from "@/constants/Colors";
+import { useUser } from "@/lib/UserContext";
 
 /*
 const STATUS_COLORS: Record<HealthStatus, string> = {
@@ -35,6 +36,7 @@ export default function HorseDetailScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const styles = getStyles(theme);
+  const { canEdit, canDelete } = useUser();
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -192,21 +194,25 @@ export default function HorseDetailScreen() {
       )}
 
       <View style={styles.actions}>
-        <Pressable
-          style={styles.editButton}
-          onPress={() => router.push(`/horse/edit/${horse.id}`)}
-        >
-          <Text style={styles.editButtonText}>Edit Horse</Text>
-        </Pressable>
-        <Pressable style={styles.deleteButton} onPress={confirmDelete}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </Pressable>
+        {canEdit && (
+          <Pressable
+            style={styles.editButton}
+            onPress={() => router.push(`/horse/edit/${horse.id}`)}
+          >
+            <Text style={styles.editButtonText}>Edit Horse</Text>
+          </Pressable>
+        )}
+        {canDelete && (
+          <Pressable style={styles.deleteButton} onPress={confirmDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.medicalSection}>
         <View style={styles.medicalHeader}>
           <Text style={styles.sectionTitle}>Medical Records</Text>
-          {!showRecordForm && (
+          {!showRecordForm && canEdit && (
             <Pressable
               style={styles.addRecordButton}
               onPress={() => setShowRecordForm(true)}
@@ -291,13 +297,15 @@ export default function HorseDetailScreen() {
           horse.medical_records.map((r) => (
             <View key={r.id}>
               <MedicalRecordCard record={r} />
-              <Pressable
-                style={styles.deleteRecordButton}
-                onPress={() => confirmDeleteRecord(r.id)}
-              >
-                <FontAwesome name="trash-o" size={14} color={theme.danger} />
-                <Text style={styles.deleteRecordText}>Delete</Text>
-              </Pressable>
+              {canEdit && (
+                <Pressable
+                  style={styles.deleteRecordButton}
+                  onPress={() => confirmDeleteRecord(r.id)}
+                >
+                  <FontAwesome name="trash-o" size={14} color={theme.danger} />
+                  <Text style={styles.deleteRecordText}>Delete</Text>
+                </Pressable>
+              )}
             </View>
           ))
         )}

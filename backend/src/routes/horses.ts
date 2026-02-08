@@ -122,8 +122,8 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
   }
 });
 
-// DELETE /api/horses/:id  — delete a horse
-router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
+// DELETE /api/horses/:id  — delete a horse (editor or admin only)
+router.delete("/:id", authenticateToken, requireEditor, async (req, res) => {
   try {
     const { id } = req.params;
 

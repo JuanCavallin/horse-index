@@ -1,19 +1,32 @@
 import { useCallback, useState } from "react";
-import { ActivityIndicator, View, StyleSheet, useColorScheme } from "react-native";
+import { ActivityIndicator, View, StyleSheet, useColorScheme, Text } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { horsesApi, medicalApi } from "@/lib/api";
 import { HorseWithRecords, HorseFormData } from "@/lib/types";
 import HorseForm from "@/components/HorseForm";
 import Colors from "@/constants/Colors";
+import { useUser } from "@/lib/UserContext";
 
 export default function EditHorseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const { canEdit, loading: userLoading } = useUser();
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Redirect if user doesn't have permission
+  if (!userLoading && !canEdit) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ fontSize: 16, color: theme.text, textAlign: "center" }}>
+          You don't have permission to edit horses. Only editors and administrators can edit horses.
+        </Text>
+      </View>
+    );
+  }
 
   useFocusEffect(
     useCallback(() => {

@@ -97,8 +97,8 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
   }
 });
 
-// DELETE /api/medical-records/:id  — delete a record
-router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
+// DELETE /api/medical-records/:id  — delete a record (editor or admin only)
+router.delete("/:id", authenticateToken, requireEditor, async (req, res) => {
   try {
     const { id } = req.params;
 
