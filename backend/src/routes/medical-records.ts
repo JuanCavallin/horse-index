@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase";
-import { authenticateToken, requireEditor, requireAdmin } from "../middleware/auth";
+import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
+import { logChanges, logCreation, logDeletion } from "../lib/audit";
 
 const router = Router();
 
@@ -49,7 +50,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/medical-records  — create a record
-router.post("/", authenticateToken, requireEditor, async (req, res) => {
+router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
     const { horse_id, photo_url, description } = req.body;
 
@@ -64,6 +65,12 @@ router.post("/", authenticateToken, requireEditor, async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Log the creation
+    if (req.user) {
+      await logCreation(req.user.id, "medical_records", data);
+    }
+
     res.status(201).json(data);
   } catch (err) {
     console.error("POST /api/medical-records error:", err);
@@ -72,9 +79,20 @@ router.post("/", authenticateToken, requireEditor, async (req, res) => {
 });
 
 // PUT /api/medical-records/:id  — update a record
-router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+
+    // Fetch the original record for audit logging
+    const { data: originalRecord, error: fetchError } = await supabase
+      .from("medical_records")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !originalRecord) {
+      return res.status(404).json({ error: "Medical record not found" });
+    }
 
     const { data, error } = await supabase
       .from("documents")
@@ -90,6 +108,11 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
       throw error;
     }
 
+    // Log the changes
+    if (req.user) {
+      await logChanges(req.user.id, "medical_records", originalRecord, data);
+    }
+
     res.json(data);
   } catch (err) {
     console.error("PUT /api/medical-records/:id error:", err);
@@ -97,10 +120,21 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
   }
 });
 
-// DELETE /api/medical-records/:id  — delete a record
-router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
+// DELETE /api/medical-records/:id  — delete a record (editor or admin only)
+router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+
+    // Fetch the record data before deleting for audit logging
+    const { data: record, error: fetchError } = await supabase
+      .from("medical_records")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !record) {
+      return res.status(404).json({ error: "Medical record not found" });
+    }
 
     const { error } = await supabase
       .from("documents")
@@ -108,6 +142,12 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
       .eq("id", id);
 
     if (error) throw error;
+
+    // Log the deletion
+    if (req.user) {
+      await logDeletion(req.user.id, "medical_records", record);
+    }
+
     res.status(204).send();
   } catch (err) {
     console.error("DELETE /api/medical-records/:id error:", err);

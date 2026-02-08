@@ -7,11 +7,16 @@ interface UserContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  role: UserRole | null;
+  effectiveRole: UserRole | null;
   isViewer: boolean;
   isEditor: boolean;
   isAdmin: boolean;
   canEdit: boolean; // editor or admin
   canDelete: boolean; // admin only
+  viewerMode: boolean;
+  enableViewerMode: () => void;
+  disableViewerMode: () => void;
   refreshUser: () => Promise<void>;
 }
 
@@ -21,6 +26,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerMode, setViewerMode] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -32,6 +38,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       
       if (!session) {
         setUser(null);
+        setViewerMode(false);
         return;
       }
 
@@ -56,6 +63,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         fetchUser();
       } else {
         setUser(null);
+        setViewerMode(false);
         setLoading(false);
       }
     });
@@ -63,15 +71,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const effectiveRole = viewerMode ? UserRole.viewer : user?.role ?? null;
+
   const value: UserContextType = {
     user,
     loading,
     error,
-    isViewer: user?.role === UserRole.viewer,
-    isEditor: user?.role === UserRole.editor,
-    isAdmin: user?.role === UserRole.administrator,
-    canEdit: user?.role === UserRole.editor || user?.role === UserRole.administrator,
-    canDelete: user?.role === UserRole.editor || user?.role === UserRole.administrator,
+    role: user?.role ?? null,
+    effectiveRole,
+    isViewer: effectiveRole === UserRole.viewer,
+    isEditor: effectiveRole === UserRole.editor,
+    isAdmin: effectiveRole === UserRole.administrator,
+    canEdit: effectiveRole === UserRole.editor || effectiveRole === UserRole.administrator,
+    canDelete: effectiveRole === UserRole.editor || effectiveRole === UserRole.administrator,
+    viewerMode,
+    enableViewerMode: () => setViewerMode(true),
+    disableViewerMode: () => setViewerMode(false),
     refreshUser: fetchUser,
   };
 

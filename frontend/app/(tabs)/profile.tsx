@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   useColorScheme,
 } from "react-native";
-import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Colors from "@/constants/Colors";
+import { useUser } from "@/lib/UserContext";
+import { UserRole } from "@/lib/types";
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
@@ -22,6 +23,9 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { role, viewerMode, enableViewerMode, disableViewerMode } = useUser();
+  const isElevated = role === UserRole.editor || role === UserRole.administrator;
+  const roleLabel = role === UserRole.administrator ? "ADMIN" : "EDITOR";
 
   useEffect(() => {
     loadUser();
@@ -83,6 +87,11 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <FontAwesome name="user-circle" size={80} color={theme.tint} />
         <Text style={styles.headerText}>Profile</Text>
+        {isElevated && (
+          <View style={styles.roleBadge}>
+            <Text style={styles.roleBadgeText}>{roleLabel}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.infoSection}>
@@ -127,6 +136,30 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.actionsSection}>
+        {user && isElevated && !viewerMode && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.viewerModeButton,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={enableViewerMode}
+          >
+            <FontAwesome name="eye" size={18} color={theme.text} />
+            <Text style={styles.viewerModeText}>View as Viewer</Text>
+          </Pressable>
+        )}
+        {user && isElevated && viewerMode && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.viewerModeExitButton,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={disableViewerMode}
+          >
+            <FontAwesome name="eye-slash" size={18} color={theme.onTint} />
+            <Text style={styles.viewerModeExitText}>Exit Viewer View</Text>
+          </Pressable>
+        )}
         {user && (
           <Pressable
             style={({ pressed }) => [
@@ -224,6 +257,19 @@ const getStyles = (theme: typeof Colors.light) =>
       color: theme.text,
       marginTop: 16,
     },
+    roleBadge: {
+      marginTop: 10,
+      backgroundColor: theme.tint,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 999,
+    },
+    roleBadgeText: {
+      color: theme.onTint,
+      fontSize: 12,
+      fontWeight: "700",
+      letterSpacing: 0.6,
+    },
     infoSection: {
       backgroundColor: theme.card,
       marginTop: 20,
@@ -265,6 +311,39 @@ const getStyles = (theme: typeof Colors.light) =>
     actionsSection: {
       padding: 20,
       marginTop: 20,
+      gap: 12,
+    },
+    viewerModeButton: {
+      backgroundColor: theme.chipBackground,
+      borderColor: theme.border,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 8,
+      gap: 10,
+    },
+    viewerModeText: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: "600",
+    },
+    viewerModeExitButton: {
+      backgroundColor: theme.tint,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 8,
+      gap: 10,
+    },
+    viewerModeExitText: {
+      color: theme.onTint,
+      fontSize: 15,
+      fontWeight: "700",
     },
     logoutButton: {
       backgroundColor: theme.danger,

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
+import { logChanges, logCreation, logDeletion } from "../lib/audit";
 
 const router = Router();
 
@@ -60,7 +61,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/horses  — create a horse (optionally with inline medical records)
-router.post("/", authenticateToken, requireEditor, async (req, res) => {
+router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
     const { new_medical_records, ...horseData } = req.body;
 
@@ -75,6 +76,11 @@ router.post("/", authenticateToken, requireEditor, async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Log the creation
+    if (req.user) {
+      await logCreation(req.user.id, "horses", horse);
+    }
 
     // Insert inline medical records if provided
     if (new_medical_records && new_medical_records.length > 0) {
@@ -96,9 +102,21 @@ router.post("/", authenticateToken, requireEditor, async (req, res) => {
 });
 
 // PUT /api/horses/:id  — update a horse
-router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+
+    // Fetch the original horse data for audit logging
+    const { data: originalHorse, error: fetchError } = await supabase
+      .from("horses")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !originalHorse) {
+      return res.status(404).json({ error: "Horse not found" });
+    }
+
     const updateData = { ...req.body, updated_at: new Date().toISOString(), last_updated: new Date().toISOString() };
 
     const { data, error } = await supabase
@@ -115,6 +133,11 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
       throw error;
     }
 
+    // Log the changes
+    if (req.user) {
+      await logChanges(req.user.id, "horses", originalHorse, data);
+    }
+
     res.json(data);
   } catch (err) {
     console.error("PUT /api/horses/:id error:", err);
@@ -122,10 +145,21 @@ router.put("/:id", authenticateToken, requireEditor, async (req, res) => {
   }
 });
 
-// DELETE /api/horses/:id  — delete a horse
-router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
+// DELETE /api/horses/:id  — delete a horse (editor or admin only)
+router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+
+    // Fetch the horse data before deleting for audit logging
+    const { data: horse, error: fetchError } = await supabase
+      .from("horses")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !horse) {
+      return res.status(404).json({ error: "Horse not found" });
+    }
 
     const { error } = await supabase
       .from("horses")
@@ -133,6 +167,11 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
       .eq("id", id);
 
     if (error) throw error;
+
+    // Log the deletion
+    if (req.user) {
+      await logDeletion(req.user.id, "horses", horse);
+    }
 
     res.status(204).send();
   } catch (err) {
