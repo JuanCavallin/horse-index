@@ -2,7 +2,7 @@ import { Router } from "express";
 const router = Router();
 
 router.get("/", (req, res) => {
-  res.json({ message: "Audit Trail endpoint works" });
+  res.json({ message: "Action Taken endpoint works" });
 });
 
 export default router;

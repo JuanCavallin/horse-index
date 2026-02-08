@@ -1,21 +1,34 @@
 import { supabase } from './lib/supabase';
 import express from "express";
 import cors from "cors";
+
 import pingRouter from "./routes/ping";
+import usersRouter from "./routes/users";
+import horsesRouter from "./routes/horses";
+import treatmentsRouter from "./routes/treatments";
+import actionTakenRouter from "./routes/action-taken";
+import dailyObsRouter from "./routes/daily-observations";
+import auditTrailRouter from "./routes/audit-trail";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-app.use(cors()); // enables CORS for any route (later on, change this to specify allowed origins)
+app.use(cors());
 app.use(express.json());
 
 // Routes
-// Note: Mounting at "/" means your endpoint is http://localhost:3001/ping
 app.use("/", pingRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/horses", horsesRouter);
+app.use("/api/treatments", treatmentsRouter);
+app.use("/api/action-taken", actionTakenRouter);
+app.use("/api/daily-observations", dailyObsRouter);
+app.use("/api/audit-trail", auditTrailRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
+
 
 app.get('/test-db', async (req, res) => {
   const { data, error } = await supabase
