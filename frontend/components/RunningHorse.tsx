@@ -9,22 +9,22 @@ import {
 } from "react-native";
 
 const FRAMES: ImageSourcePropType[] = [
-  require("@/assets/images/horse_animation/tile_0.png"),
-  require("@/assets/images/horse_animation/tile_1.png"),
-  require("@/assets/images/horse_animation/tile_2.png"),
-  require("@/assets/images/horse_animation/tile_3.png"),
-  require("@/assets/images/horse_animation/tile_4.png"),
-  require("@/assets/images/horse_animation/tile_5.png"),
-  require("@/assets/images/horse_animation/tile_6.png"),
-  require("@/assets/images/horse_animation/tile_7.png"),
-  require("@/assets/images/horse_animation/tile_8.png"),
-  require("@/assets/images/horse_animation/tile_9.png"),
-  require("@/assets/images/horse_animation/tile_10.png"),
-  require("@/assets/images/horse_animation/tile_11.png"),
-  require("@/assets/images/horse_animation/tile_12.png"),
-  require("@/assets/images/horse_animation/tile_13.png"),
-  require("@/assets/images/horse_animation/tile_14.png"),
-  require("@/assets/images/horse_animation/tile_15.png"),
+  require("@/assets/images/horse_animation/original/tile_0.png"),
+  require("@/assets/images/horse_animation/original/tile_1.png"),
+  require("@/assets/images/horse_animation/original/tile_2.png"),
+  require("@/assets/images/horse_animation/original/tile_3.png"),
+  require("@/assets/images/horse_animation/original/tile_4.png"),
+  require("@/assets/images/horse_animation/original/tile_5.png"),
+  require("@/assets/images/horse_animation/original/tile_6.png"),
+  require("@/assets/images/horse_animation/original/tile_7.png"),
+  require("@/assets/images/horse_animation/original/tile_8.png"),
+  require("@/assets/images/horse_animation/original/tile_9.png"),
+  require("@/assets/images/horse_animation/original/tile_10.png"),
+  require("@/assets/images/horse_animation/original/tile_11.png"),
+  require("@/assets/images/horse_animation/original/tile_12.png"),
+  require("@/assets/images/horse_animation/original/tile_13.png"),
+  require("@/assets/images/horse_animation/original/tile_14.png"),
+  require("@/assets/images/horse_animation/original/tile_15.png"),
 ];
 
 const SPRITE_WIDTH = 80;
