@@ -53,7 +53,7 @@ export default function HorseDetailScreen() {
     if (!id) return;
     setLoading(true);
     horsesApi
-      .get(Number(id))
+      .get(id)
       .then(setHorse)
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
@@ -67,7 +67,7 @@ export default function HorseDetailScreen() {
 
   const confirmDelete = () => {
     const doDelete = async () => {
-      await horsesApi.delete(Number(id));
+      await horsesApi.delete(id);
       router.replace("/");
     };
     if (Platform.OS === "web") {
@@ -82,7 +82,7 @@ export default function HorseDetailScreen() {
     }
   };
 
-  const confirmDeleteRecord = (recordId: number) => {
+  const confirmDeleteRecord = (recordId: string) => {
     const doDelete = async () => {
       await medicalApi.delete(recordId);
       loadHorse();
@@ -124,7 +124,7 @@ export default function HorseDetailScreen() {
     setRecSubmitting(true);
     try {
       await medicalApi.create({
-        horse_id: Number(id),
+        horse_id: id,
         record_type: recType,
         description: recDescription.trim(),
         vet_name: recVetName.trim(),

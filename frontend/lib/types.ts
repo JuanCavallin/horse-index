@@ -47,7 +47,7 @@ export interface UserUpdate {
 }
 
 export interface Horse {
-  id: number;
+  id: string;
   name: string;
   breed: string;
   birth_year: number;
@@ -85,7 +85,7 @@ export interface Horse {
   regular_treatment: boolean;
   medical_notes: string | null;
   last_updated: string;
-  updated_by: number;
+  updated_by: string;
 
 }
 
@@ -134,8 +134,8 @@ export interface HorseUpdate extends Partial<HorseCreate> {}
 
 //Horse Documents
 export interface MedicalRecord {
-  id: number;
-  horse_id: number;
+  id: string;
+  horse_id: string;
   record_type: RecordType;
   description: string;
   vet_name: string;
@@ -146,7 +146,7 @@ export interface MedicalRecord {
 }
 
 export interface MedicalRecordCreate {
-  horse_id: number;
+  horse_id: string;
   record_type: RecordType;
   description: string;
   vet_name: string;
@@ -182,12 +182,12 @@ export enum TreatmentType {
 
 //TODO: how to handle "other option"
 export interface TreatmentRecord {
-  id: number;
+  id: string;
   //If treatment type equals other, set type to string
   type: TreatmentType | string;
   frequency?: string | null; // times per day, week, month, etc
   last_updated: string;
-  updated_by: number;
+  updated_by: string;
 }
 
 //TODO: may not be necessary since this will be a niche feature for admin to add and will be complicated to set up. Can just preconfigure with some from the database rn
@@ -206,8 +206,8 @@ export interface HorseFormData extends HorseCreate {
 }
 
 export interface AuditLog {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   table_name: string;
   field_name: string;
   before_value: string | null;

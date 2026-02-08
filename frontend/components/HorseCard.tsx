@@ -1,27 +1,28 @@
 import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
-import { Horse, HealthStatus } from "@/lib/types";
-import Colors from "@/constants/Colors";
+import { Horse/*, HealthStatus */} from "@/lib/types";
 
+import Colors from "@/constants/Colors";
+/*
 const STATUS_LABELS: Record<HealthStatus, string> = {
   [HealthStatus.healthy]: "Healthy",
   [HealthStatus.needs_attention]: "Needs Attention",
   [HealthStatus.critical]: "Critical",
   [HealthStatus.palliative]: "Palliative",
 };
-
+*/
 export default function HorseCard({ horse }: { horse: Horse }) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-
+/*
   const statusColors: Record<HealthStatus, string> = {
     [HealthStatus.healthy]: theme.healthy,
     [HealthStatus.needs_attention]: theme.needs_attention,
     [HealthStatus.critical]: theme.critical,
     [HealthStatus.palliative]: theme.palliative,
   };
-
+*/
   const styles = getStyles(theme);
 
   return (
@@ -33,18 +34,20 @@ export default function HorseCard({ horse }: { horse: Horse }) {
         <View style={styles.info}>
           <Text style={styles.name}>{horse.name}</Text>
           <Text style={styles.detail}>
-            {horse.breed} &middot; {horse.age} yrs &middot; {horse.color}
+            {horse.breed} &middot; {new Date().getFullYear() - horse.birth_year} yrs &middot; {horse.color}
           </Text>
           <Text style={styles.detail}>Gender: {horse.gender}</Text>
         </View>
         <View
           style={[
             styles.badge,
-            { backgroundColor: statusColors[horse.health_status] },
+            { backgroundColor: "#9CD479" },
+              /*{ backgroundColor: STATUS_COLORS[horse.health_status] },*/
           ]}
         >
           <Text style={styles.badgeText}>
-            {STATUS_LABELS[horse.health_status]}
+            {/*{STATUS_LABELS[horse.health_status]}*/}
+            Healthy
           </Text>
         </View>
       </View>

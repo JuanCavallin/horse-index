@@ -13,23 +13,23 @@ insert into public.users (name, administrator, edit_capabilities, phone) values
 -- HORSES
 -- =========================
 insert into public.horses (
-  name, breed, age, gender, color, health_status, arrival_date,
+  name, breed, birth_year, gender, color, health_status, arrival_date,
   heart_murmur, cushings_positive, military_police_horse, ex_racehorse, pasture, grooming_day,
   behavior_notes, medical_notes, updated_by
 ) values
-  ('Thunder', 'Mustang', 22, 'Gelding', 'Bay', 'healthy', '2018-03-15',
+  ('Thunder', 'Mustang', 2004, 'Gelding', 'Bay', 'healthy', '2018-03-15',
    false, false, false, true, 'North Field', 'Monday',
    'Very friendly, loves carrots.', 'No current issues.', 1),
-  ('Belle', 'Arabian', 28, 'Mare', 'Grey', 'needs_attention', '2015-06-01',
+  ('Belle', 'Arabian', 1998, 'Mare', 'Grey', 'needs_attention', '2015-06-01',
    true, false, false, false, 'South Pasture', 'Wednesday',
    'Shy around strangers.', 'Heart murmur - monitor closely.', 1),
-  ('Rusty', 'Quarter Horse', 30, 'Gelding', 'Chestnut', 'palliative', '2012-09-10',
+  ('Rusty', 'Quarter Horse', 1996, 'Gelding', 'Chestnut', 'palliative', '2012-09-10',
    false, true, true, false, 'Barn Area', 'Friday',
    'Gentle giant, great with kids.', 'Cushings positive, on Prascend.', 2),
-  ('Daisy', 'Thoroughbred', 18, 'Mare', 'Dark Bay', 'healthy', '2020-01-20',
+  ('Daisy', 'Thoroughbred', 2008, 'Mare', 'Dark Bay', 'healthy', '2020-01-20',
    false, false, false, true, 'East Field', 'Tuesday',
    'Energetic, needs daily exercise.', null, 2),
-  ('Scout', 'Paint', 25, 'Gelding', 'Pinto', 'critical', '2016-11-05',
+  ('Scout', 'Paint', 2001, 'Gelding', 'Pinto', 'critical', '2016-11-05',
    false, false, false, false, 'Barn Area', 'Thursday',
    'Kicks - approach with caution.', 'Heaves, requires medication.', 1);
 
