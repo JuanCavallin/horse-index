@@ -18,7 +18,7 @@ import {
 } from "@/lib/types";
 
 const HEALTH_OPTIONS = Object.values(HealthStatus);
-const SEX_OPTIONS = ["Stallion", "Mare", "Gelding"];
+const SEX_OPTIONS = ["Mare", "Gelding"];
 const RECORD_TYPES = Object.values(RecordType);
 
 const TYPE_ICONS: Record<RecordType, React.ComponentProps<typeof FontAwesome>["name"]> = {
