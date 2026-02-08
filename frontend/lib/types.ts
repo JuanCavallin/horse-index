@@ -18,7 +18,7 @@ export interface Horse {
   name: string;
   breed: string;
   age: number;
-  sex: string;
+  sex: string; //TODO: rename to gender in all files
   color: string;
   photo_url: string | null;
   health_status: HealthStatus;
