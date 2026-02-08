@@ -1,13 +1,10 @@
 // frontend/app/login.tsx
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Text, useColorScheme, Platform, Pressable } from 'react-native';
-import { supabase } from '../lib/supabase'; // Make sure this path is correct
+import React, { useState } from 'react';
+import { View, TextInput, StyleSheet, Alert, Text, useColorScheme, Platform, Pressable } from 'react-native';
+import { supabase } from '../lib/supabase';
 import { useRouter } from 'expo-router';
 import Colors from "@/constants/Colors";
 import RunningHorse from "@/components/RunningHorse";
-
-// Animation phases: "top" -> "bottom" -> "waiting" -> "top" ...
-type AnimPhase = "top" | "bottom" | "waiting";
 
 export default function Login() {
   const router = useRouter();
@@ -17,31 +14,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Horse animation state
-  const [phase, setPhase] = useState<AnimPhase>("top");
-  const [cycleKey, setCycleKey] = useState(0); // bump to re-trigger
-  const waitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    // Start the first cycle
-    setPhase("top");
-    return () => {
-      if (waitTimer.current) clearTimeout(waitTimer.current);
-    };
-  }, []);
-
-  const onTopFinished = useCallback(() => {
-    setPhase("bottom");
-  }, []);
-
-  const onBottomFinished = useCallback(() => {
-    setPhase("waiting");
-    waitTimer.current = setTimeout(() => {
-      setCycleKey((k) => k + 1);
-      setPhase("top");
-    }, 5000);
-  }, []);
 
   // 1. Sign In Function
   async function signInWithEmail() {
@@ -91,13 +63,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <RunningHorse
-        key={`top-${cycleKey}`}
-        position="top"
-        delay={0}
-        running={phase === "top"}
-        onFinished={onTopFinished}
-      />
+      <RunningHorse />
 
       <Text style={styles.header}>Horse Index Login</Text>
       <TextInput
@@ -124,13 +90,6 @@ export default function Login() {
         <Text style={styles.signUpText}>Sign Up</Text>
       </Pressable>
 
-      <RunningHorse
-        key={`bottom-${cycleKey}`}
-        position="bottom"
-        delay={1000}
-        running={phase === "bottom"}
-        onFinished={onBottomFinished}
-      />
     </View>
   );
 }
