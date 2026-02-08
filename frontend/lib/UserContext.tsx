@@ -71,7 +71,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     isEditor: user?.role === UserRole.editor,
     isAdmin: user?.role === UserRole.administrator,
     canEdit: user?.role === UserRole.editor || user?.role === UserRole.administrator,
-    canDelete: user?.role === UserRole.administrator,
+    canDelete: user?.role === UserRole.editor || user?.role === UserRole.administrator,
     refreshUser: fetchUser,
   };
 
