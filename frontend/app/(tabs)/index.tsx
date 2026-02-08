@@ -34,7 +34,6 @@ export default function HorseListScreen() {
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
   //const [filter, setFilter] = useState<HealthStatus | null>(null);
-  const [pingResult, setPingResult] = useState<string>("");
 
   const loadHorses = useCallback(async () => {
     setLoading(true);
@@ -48,16 +47,6 @@ export default function HorseListScreen() {
     }
   }, []);
 
-  const testPing = async () => {
-    try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${API_URL}/ping`);
-      const data = await response.json();
-      setPingResult(data.message || JSON.stringify(data));
-    } catch (e) {
-      setPingResult(`Error: ${e}`);
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -88,15 +77,6 @@ export default function HorseListScreen() {
         ))}
       </View>
       */}
-      <View style={styles.pingSection}>
-        <Pressable style={styles.pingButton} onPress={testPing}>
-          <Text style={styles.pingButtonText}>Test: Ping backend</Text>
-        </Pressable>
-        {pingResult ? (
-          <Text style={styles.pingResult}>{pingResult}</Text>
-        ) : null}
-      </View>
-
       {loading ? (
         <ActivityIndicator size="large" color={theme.tint} style={styles.loader} />
       ) : horses.length === 0 ? (
@@ -136,27 +116,6 @@ const getStyles = (theme: typeof Colors.light) =>
     filterChipActive: { backgroundColor: theme.tint },
     filterText: { fontSize: 12, color: theme.mutedText, textTransform: "capitalize" },
     filterTextActive: { color: theme.onTint },
-    pingSection: {
-      padding: 12,
-      alignItems: "center",
-      gap: 8,
-    },
-    pingButton: {
-      backgroundColor: theme.info,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 8,
-    },
-    pingButtonText: {
-      color: theme.onTint,
-      fontSize: 14,
-      fontWeight: "600",
-    },
-    pingResult: {
-      fontSize: 12,
-      color: theme.mutedText,
-      fontStyle: "italic",
-    },
     loader: { marginTop: 40 },
     empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },
     emptyText: { fontSize: 16, color: theme.subtleText, textAlign: "center" },

@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { auditApi } from "@/lib/api";
 import type { AuditLog } from "@/lib/types";
 import Colors from "@/constants/Colors";
+import { useUser } from "@/lib/UserContext";
 
 const formatDateTime = (value: string) => {
   const d = new Date(value);
@@ -24,9 +25,9 @@ export default function AuditLogListScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const styles = getStyles(theme);
+  const { canEdit, loading: userLoading } = useUser();
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pingResult, setPingResult] = useState<string>("");
 
   const loadAuditLogs = useCallback(async () => {
     setLoading(true);
@@ -41,23 +42,26 @@ export default function AuditLogListScreen() {
     }
   }, []);
 
-  const testPing = async () => {
-    try {
-      const API_URL =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${API_URL}/ping`);
-      const data = await response.json();
-      setPingResult(data.message || JSON.stringify(data));
-    } catch (e) {
-      setPingResult(`Error: ${e}`);
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {
+      if (userLoading || !canEdit) {
+        return;
+      }
       loadAuditLogs();
-    }, [loadAuditLogs])
+    }, [loadAuditLogs, canEdit, userLoading])
   );
+
+  // Redirect if user doesn't have permission
+  if (!userLoading && !canEdit) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ fontSize: 16, color: theme.text, textAlign: "center" }}>
+          You don't have permission to view audit logs. Only editors and administrators can access audit logs.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -66,13 +70,6 @@ export default function AuditLogListScreen() {
         <Pressable style={styles.refreshBtn} onPress={loadAuditLogs}>
           <Text style={styles.refreshText}>Refresh</Text>
         </Pressable>
-      </View>
-
-      <View style={styles.pingSection}>
-        <Pressable style={styles.pingButton} onPress={testPing}>
-          <Text style={styles.pingButtonText}>Test: Ping backend</Text>
-        </Pressable>
-        {pingResult ? <Text style={styles.pingResult}>{pingResult}</Text> : null}
       </View>
 
       <View style={styles.tableHeader}>
@@ -155,21 +152,6 @@ const getStyles = (theme: typeof Colors.light) =>
       borderRadius: 8,
     },
     refreshText: { color: theme.onTint, fontWeight: "700", fontSize: 12 },
-
-    pingSection: {
-      paddingHorizontal: 12,
-      paddingBottom: 10,
-      alignItems: "center",
-      gap: 8,
-    },
-    pingButton: {
-      backgroundColor: theme.info,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 8,
-    },
-    pingButtonText: { color: theme.onTint, fontSize: 14, fontWeight: "600" },
-    pingResult: { fontSize: 12, color: theme.mutedText, fontStyle: "italic" },
 
     tableHeader: {
       flexDirection: "row",

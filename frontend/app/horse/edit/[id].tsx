@@ -17,6 +17,18 @@ export default function EditHorseScreen() {
   const [horse, setHorse] = useState<HorseWithRecords | null>(null);
   const [loading, setLoading] = useState(true);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!id || userLoading || !canEdit) return;
+      setLoading(true);
+      horsesApi
+        .get(id)
+        .then(setHorse)
+        .catch((e) => console.error(e))
+        .finally(() => setLoading(false));
+    }, [id, userLoading, canEdit])
+  );
+
   // Redirect if user doesn't have permission
   if (!userLoading && !canEdit) {
     return (
@@ -27,18 +39,6 @@ export default function EditHorseScreen() {
       </View>
     );
   }
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!id) return;
-      setLoading(true);
-      horsesApi
-        .get(id)
-        .then(setHorse)
-        .catch((e) => console.error(e))
-        .finally(() => setLoading(false));
-    }, [id])
-  );
 
   const handleSubmit = async (data: HorseFormData) => {
     const { new_medical_records, ...horseData } = data;

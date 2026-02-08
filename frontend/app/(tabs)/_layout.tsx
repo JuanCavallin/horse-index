@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
 
 import Colors from "@/constants/Colors";
+import { useUser } from "@/lib/UserContext";
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
@@ -13,13 +14,18 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { canEdit } = useUser();
+  const tabBarStyle = {
+    backgroundColor: Colors[colorScheme ?? "light"].card,
+    ...(canEdit ? {} : { paddingHorizontal: 28 }),
+  };
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tabIconDefault,
-        tabBarStyle: { backgroundColor: Colors[colorScheme ?? "light"].card },
+        tabBarStyle: tabBarStyle,
       }}
     >
       <Tabs.Screen
@@ -36,6 +42,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="plus-circle" color={color} />
           ),
+          tabBarButton: canEdit ? undefined : () => null,
         }}
       />
       <Tabs.Screen
@@ -50,6 +57,7 @@ export default function TabLayout() {
         options={{
           title: "Audit",
           tabBarIcon: ({ color }) => <TabBarIcon name="file-text" color={color} />,
+          tabBarButton: canEdit ? undefined : () => null,
         }}
       />
       <Tabs.Screen
