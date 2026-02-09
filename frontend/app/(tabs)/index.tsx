@@ -173,7 +173,7 @@ export default function HorseListScreen() {
     
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Horses</Text>
+        <Text style={styles.title}>Mill Creek Farm</Text>
         <Pressable style={styles.archiveButton} onPress={() => router.push("/archive")}> 
           <Text style={styles.archiveText}>Archive</Text>
         </Pressable>
