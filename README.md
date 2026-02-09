@@ -3,6 +3,11 @@
 ### Get Started
 
 Expo Go: `node start.js`
+- Download ngrok
+- Download node.js
+- `cd frontend && npm install`
+- `cd backend && npm install`
+- in root, `node start.js`
 
 Docker Container: `docker compose up --build`
 
