@@ -70,7 +70,7 @@ export const medicalApi = {
   listForHorse: (horseId: string) =>
     request<MedicalRecord[]>(`/medical-records/horse/${horseId}`),
   get: (id: string) => request<MedicalRecord>(`/medical-records/${id}`),
-  create: (data: MedicalRecordCreate & { photoBase64?: string; photoFileName?: string }) =>
+  create: (data: MedicalRecordCreate & { photoBase64?: string | null; photoFileName?: string | null }) =>
     request<MedicalRecord>("/medical-records/", {
       method: "POST",
       body: JSON.stringify(data),

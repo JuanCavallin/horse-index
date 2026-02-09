@@ -13,6 +13,7 @@ import {
   useColorScheme,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import {
@@ -682,18 +683,17 @@ export default function HorseForm({
             <Text style={styles.recordFormTitle}>New Treatment</Text>
 
             <Text style={styles.label}>Treatment Type *</Text>
-            <View style={styles.chipRow}>
-              {TREATMENT_TYPES.map((t) => (
-                <Pressable
-                  key={t}
-                  style={[styles.chip, treatType === t && styles.chipSelected]}
-                  onPress={() => setTreatType(t)}
-                >
-                  <Text style={[styles.chipText, treatType === t && styles.chipTextSelected]}>
-                    {t.replace(/_/g, " ")}
-                  </Text>
-                </Pressable>
-              ))}
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={treatType}
+                onValueChange={(value) => setTreatType(value)}
+                style={styles.picker}
+                dropdownIconColor={theme.text}
+              >
+                {TREATMENT_TYPES.map((t) => (
+                  <Picker.Item key={t} label={t.replace(/_/g, " ")} value={t} />
+                ))}
+              </Picker>
             </View>
 
             {treatType === TreatmentType.Other && (
@@ -919,4 +919,17 @@ const getStyles = (theme: typeof Colors.light) =>
     cancelRecordText: { fontSize: 14, color: theme.mutedText },
     saveRecordButton: { padding: 12, borderRadius: 8, backgroundColor: theme.tint },
     saveRecordText: { color: theme.onTint, fontSize: 14, fontWeight: "700" },
+
+    // Picker
+    pickerWrapper: {
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 8,
+      backgroundColor: theme.surface,
+      marginTop: 4,
+      overflow: "hidden",
+    },
+    picker: {
+      color: theme.text,
+    },
   });
