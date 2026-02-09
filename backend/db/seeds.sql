@@ -41,15 +41,17 @@ update public.horses set requires_extra_feed = true where name = 'Belle';
 -- =========================
 -- MEDICAL RECORDS
 -- =========================
-insert into public.medical_records (horse_id, record_type, description, vet_name, date, next_followup, notes) values
-  (1, 'checkup', 'Annual wellness exam - all clear.', 'Dr. Martinez', '2025-11-01', '2026-11-01', 'Teeth in good shape.'),
-  (1, 'vaccination', 'Flu and tetanus booster.', 'Dr. Martinez', '2025-11-01', '2026-11-01', null),
-  (2, 'checkup', 'Heart murmur evaluation.', 'Dr. Chen', '2025-10-15', '2026-01-15', 'Grade 2 murmur, stable.'),
-  (2, 'treatment', 'Dental float procedure.', 'Dr. Chen', '2025-08-20', null, 'Mild hooks corrected.'),
-  (3, 'treatment', 'Cushings blood panel and Prascend adjustment.', 'Dr. Patel', '2025-12-01', '2026-03-01', 'ACTH levels slightly elevated, increased dosage.'),
-  (3, 'checkup', 'Routine farrier and lameness check.', 'Dr. Patel', '2025-09-10', null, 'Mild arthritis in front left.'),
-  (4, 'vaccination', 'West Nile and rabies vaccination.', 'Dr. Martinez', '2025-10-05', '2026-10-05', null),
-  (5, 'treatment', 'Heaves management review.', 'Dr. Chen', '2025-11-20', '2026-02-20', 'Switched to soaked hay, improving.');
+insert into public.medical_records (
+  horse_id, record_type, description, vet_name, date, next_followup, notes, photo_url, updated_at, updated_by
+) values
+  (1, 'checkup', 'Annual wellness exam - all clear.', 'Dr. Martinez', '2025-11-01', '2026-11-01', 'Teeth in good shape.', null, now(), 1),
+  (1, 'vaccination', 'Flu and tetanus booster.', 'Dr. Martinez', '2025-11-01', '2026-11-01', null, null, now(), 1),
+  (2, 'checkup', 'Heart murmur evaluation.', 'Dr. Chen', '2025-10-15', '2026-01-15', 'Grade 2 murmur, stable.', null, now(), 1),
+  (2, 'treatment', 'Dental float procedure.', 'Dr. Chen', '2025-08-20', null, 'Mild hooks corrected.', null, now(), 1),
+  (3, 'treatment', 'Cushings blood panel and Prascend adjustment.', 'Dr. Patel', '2025-12-01', '2026-03-01', 'ACTH levels slightly elevated, increased dosage.', null, now(), 2),
+  (3, 'checkup', 'Routine farrier and lameness check.', 'Dr. Patel', '2025-09-10', null, 'Mild arthritis in front left.', null, now(), 2),
+  (4, 'vaccination', 'West Nile and rabies vaccination.', 'Dr. Martinez', '2025-10-05', '2026-10-05', null, null, now(), 2),
+  (5, 'treatment', 'Heaves management review.', 'Dr. Chen', '2025-11-20', '2026-02-20', 'Switched to soaked hay, improving.', null, now(), 1);
 
 -- =========================
 -- AUDIT LOGS

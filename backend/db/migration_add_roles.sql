@@ -140,9 +140,17 @@ BEGIN
         date date not null,
         next_followup date,
         notes text,
-        created_at timestamptz not null default now()
+        photo_url text,
+        created_at timestamptz not null default now(),
+        updated_at timestamptz not null default now(),
+        updated_by %s
       )', horses_id_type);
   END IF;
+
+  -- Ensure new columns exist for existing medical_records tables
+  EXECUTE 'ALTER TABLE public.medical_records ADD COLUMN IF NOT EXISTS photo_url text';
+  EXECUTE 'ALTER TABLE public.medical_records ADD COLUMN IF NOT EXISTS updated_at timestamptz not null default now()';
+  EXECUTE format('ALTER TABLE public.medical_records ADD COLUMN IF NOT EXISTS updated_by %s', horses_id_type);
 
   -- TREATMENTS TABLE
   IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'treatments') THEN
@@ -311,12 +319,23 @@ WHERE role IS NULL;
 ALTER TABLE public.users 
   ALTER COLUMN role SET NOT NULL;
 
--- Step 5: Add unique constraint
-ALTER TABLE public.users 
-  ADD CONSTRAINT users_auth_user_id_key UNIQUE (auth_user_id);
+-- Step 5: Add unique constraints (skip if they already exist)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'users_auth_user_id_key'
+  ) THEN
+    ALTER TABLE public.users
+      ADD CONSTRAINT users_auth_user_id_key UNIQUE (auth_user_id);
+  END IF;
 
-ALTER TABLE public.users 
-  ADD CONSTRAINT users_email_key UNIQUE (email);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'users_email_key'
+  ) THEN
+    ALTER TABLE public.users
+      ADD CONSTRAINT users_email_key UNIQUE (email);
+  END IF;
+END $$;
 
 -- Step 6: Drop old columns (optional - uncomment if you want to remove them)
 -- ALTER TABLE public.users 

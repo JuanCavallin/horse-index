@@ -97,7 +97,10 @@ create table if not exists public.medical_records (
   date date not null,
   next_followup date,
   notes text,
-  created_at timestamptz not null default now()
+  photo_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by bigint references public.users(id) on delete set null
 );
 
 -- =========================

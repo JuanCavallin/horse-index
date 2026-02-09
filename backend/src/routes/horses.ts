@@ -43,14 +43,14 @@ router.get("/:id", authenticateToken, async (req, res) => {
     }
 
     const { data: records, error: recError } = await supabase
-      .from("documents")
+      .from("medical_records")
       .select("*")
       .eq("horse_id", id)
       .order("updated_at", { ascending: false });
 
-    // Don't fail the whole request if documents table doesn't exist yet
+    // Don't fail the whole request if medical_records table doesn't exist yet
     if (recError) {
-      console.error("documents query error (non-fatal):", recError.message);
+      console.error("medical_records query error (non-fatal):", recError.message);
     }
 
     // Fetch treatments for this horse
@@ -175,12 +175,12 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
         });
       }
       const { error: recError } = await supabase
-        .from("documents")
+        .from("medical_records")
         .insert(records);
       if (recError) console.error("Failed to insert medical records:", recError);
       else if (req.user) {
         for (const record of records) {
-          await logCreation(req.user.id, "documents", record);
+          await logCreation(req.user.id, "medical_records", record);
         }
       }
     }
@@ -313,7 +313,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/horses/:id  — delete a horse (editor or admin only)
-router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 
