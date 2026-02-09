@@ -1,6 +1,6 @@
 export default {
   light: {
-    text: "#1d1d1d",
+    text: "#79AED4",
     background: "#fafafa",
     surface: "#ffffff",
     card: "#ffffff",
@@ -21,7 +21,7 @@ export default {
     info: "#79AED4",
   },
   dark: {
-    text: "#f0f0f0",
+    text: "#79AED4",
     background: "#2a2a2a",
     surface: "#353535",
     card: "#3a3a3a",

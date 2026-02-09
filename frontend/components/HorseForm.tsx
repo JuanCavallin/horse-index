@@ -288,6 +288,11 @@ export default function HorseForm({
       showAlert("Validation", "Please fill in all required fields.");
       return;
     }
+    const parsedYear = parseInt(birthYear, 10);
+    if (isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
+      showAlert("Validation", "Birth year must be between 1900 and 2100.");
+      return;
+    }
     setSubmitting(true);
     try {
       let photoBase64: string | null = null;
@@ -377,7 +382,7 @@ export default function HorseForm({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* === Basic Info === */}
-      <Text style={styles.sectionTitle}>Basic Info</Text>
+      <Text style={styles.sectionTitle}>Add Horse</Text>
 
       <Text style={styles.label}>Name *</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Thunderbolt" />
