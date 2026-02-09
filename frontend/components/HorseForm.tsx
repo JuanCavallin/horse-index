@@ -15,7 +15,7 @@ import {
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import {
   Eye,
   HealthStatus,
@@ -160,7 +160,7 @@ export default function HorseForm({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 0.85,
     });
 
@@ -192,7 +192,7 @@ export default function HorseForm({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 0.85,
     });
 
@@ -230,7 +230,7 @@ export default function HorseForm({
           });
         } else {
           photoBase64 = await FileSystem.readAsStringAsync(recPhotoUri, {
-            encoding: FileSystem.EncodingType.Base64,
+            encoding: 'base64',
           });
           photoFileName = recPhotoFileName || "doc-photo.jpg";
         }
@@ -321,7 +321,7 @@ export default function HorseForm({
           } else {
             // On native, use FileSystem to read as base64
             photoBase64 = await FileSystem.readAsStringAsync(photoUri, {
-              encoding: FileSystem.EncodingType.Base64,
+              encoding: 'base64',
             });
             photoName = photoFileName || "photo.jpg";
           }

@@ -11,7 +11,7 @@ router.get("/horse/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from("documents")
+      .from("medical_records")
       .select("*")
       .eq("horse_id", id)
       .order("updated_at", { ascending: false });
@@ -30,7 +30,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from("documents")
+      .from("medical_records")
       .select("*")
       .eq("id", id)
       .single();
@@ -85,7 +85,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
     }
 
     const { data, error } = await supabase
-      .from("documents")
+      .from("medical_records")
       .insert({
         horse_id,
         description,
@@ -100,7 +100,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 
     // Log the creation
     if (req.user) {
-      await logCreation(req.user.id, "documents", data);
+      await logCreation(req.user.id, "medical_records", data);
     }
 
     res.status(201).json(data);
@@ -117,7 +117,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 
     // Fetch the original record for audit logging
     const { data: originalRecord, error: fetchError } = await supabase
-      .from("documents")
+      .from("medical_records")
       .select("*")
       .eq("id", id)
       .single();
@@ -129,7 +129,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
     const { description, photo_url } = req.body;
 
     const { data, error } = await supabase
-      .from("documents")
+      .from("medical_records")
       .update({
         ...(description !== undefined && { description }),
         ...(photo_url !== undefined && { photo_url }),
@@ -149,7 +149,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 
     // Log the changes
     if (req.user) {
-      await logChanges(req.user.id, "documents", originalRecord, data);
+      await logChanges(req.user.id, "medical_records", originalRecord, data);
     }
 
     res.json(data);
@@ -160,13 +160,13 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/medical-records/:id  — delete a record (editor or admin only)
-router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 
     // Fetch the record data before deleting for audit logging
     const { data: record, error: fetchError } = await supabase
-      .from("documents")
+      .from("medical_records")
       .select("*")
       .eq("id", id)
       .single();
@@ -176,7 +176,7 @@ router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest,
     }
 
     const { error } = await supabase
-      .from("documents")
+      .from("medical_records")
       .delete()
       .eq("id", id);
 
@@ -184,7 +184,7 @@ router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest,
 
     // Log the deletion
     if (req.user) {
-      await logDeletion(req.user.id, "documents", record);
+      await logDeletion(req.user.id, "medical_records", record);
     }
 
     res.status(204).send();

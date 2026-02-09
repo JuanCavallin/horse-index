@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase";
-import { authenticateToken, requireEditor, AuthRequest } from "../middleware/auth";
+import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
 
 const router = Router();
@@ -160,7 +160,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/daily-observations/:id — delete a task
-router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 

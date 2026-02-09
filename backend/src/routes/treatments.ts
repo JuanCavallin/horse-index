@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase";
-import { authenticateToken, requireEditor, AuthRequest } from "../middleware/auth";
+import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
 
 const router = Router();
@@ -127,7 +127,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 // PUT /api/treatments/:id — update a treatment (by action_taken id)
 router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { type, frequency, notes } = req.body;
 
     // Fetch original action_taken + treatment_id
@@ -182,9 +182,9 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/treatments/:id — delete a treatment (by action_taken id)
-router.delete("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
 
     const { data: actionTaken, error: fetchError } = await supabase
       .from("action_taken")
