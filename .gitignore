@@ -1,24 +1,40 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-venv/
-*.egg
-dist/
-build/
-
-# Node / Expo
+# Dependencies
 node_modules/
+**/node_modules/
+
+# Expo / React Native
 .expo/
 dist/
 web-build/
+expo-env.d.ts
+.metro-health-check*
+frontend/ios
+frontend/android
+
+# Native files
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Build outputs
 *.tsbuildinfo
 
-# Environment
+# Environment files
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
 # IDE
 .vscode/
@@ -28,10 +44,10 @@ web-build/
 *.njsproj
 *.sln
 *.sw?
+
+# OS
 .DS_Store
+Thumbs.db
 
 # Docker
 docker-compose.override.yml
-
-# OS
-Thumbs.db
