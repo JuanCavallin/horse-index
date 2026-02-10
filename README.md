@@ -1,5 +1,9 @@
 # 🐴 Horse Index – Retirement Home for Horses
 
+https://horse-index.vercel.app/
+
+Android Download: https://docs.google.com/document/d/1nmjpuLZ2W0Hsb5QXmqqAC5Bi4LCZ_L8dKpzHxLuXFYo/edit?usp=sharing
+
 ### Get Started
 
 Expo Go: `node start.js`
