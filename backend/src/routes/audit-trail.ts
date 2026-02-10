@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Router, Response, Request } from "express";
 import { supabase } from "../lib/supabase";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 
@@ -46,7 +46,7 @@ router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) =>
 });
 
 // POST /api/audit_logs  — create an audit log entry
-router.post("/", async (req: AuthRequest, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const { user_id, table_name, field_name, before_value, after_value } = req.body;
 

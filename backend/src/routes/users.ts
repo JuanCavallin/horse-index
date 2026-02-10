@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Router, Response, Request } from "express";
 import { supabase } from "../lib/supabase";
 import { authenticateToken, requireAdmin, AuthRequest } from "../middleware/auth";
 
