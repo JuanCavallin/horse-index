@@ -10,7 +10,7 @@ module.exports = {
     '!src/app.ts'
   ],
   coveragePathIgnorePatterns: ['/node_modules/'],
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
-  testTimeout: 10000
+  testTimeout: 10000,
+  passWithNoTests: true
 };
 

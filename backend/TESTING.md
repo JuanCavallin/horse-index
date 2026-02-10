@@ -1,51 +1,14 @@
 # Backend Testing Guide
 
-## Setup
-
-```bash
-cd backend
-
-# Install test dependencies
-npm install --save-dev jest ts-jest @types/jest supertest @types/supertest
-
-# Update package.json scripts
-```
-
-Add to `backend/package.json`:
-```json
-{
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  }
-}
-```
-
 ## Running Tests
 
-### Unit/Integration Tests (Jest)
-```bash
-# Run all tests
-npm test
-
-# Run in watch mode
-npm test -- --watch
-
-# Run specific test file
-npm test -- integration.test.ts
-
-# Generate coverage report
-npm test -- --coverage
-```
-
-### Manual API Tests (Bash/cURL)
+### Manual API Tests (JavaScript)
 ```bash
 # Test local dev server
-bash tests/manual_test.sh http://localhost:8000 "Bearer YOUR_TOKEN"
+node backend/tests/manual-test.js http://localhost:8000 "YOUR_TOKEN"
 
 # Test deployed Render backend
-bash tests/manual_test.sh https://your-backend.onrender.com "Bearer YOUR_TOKEN"
+node backend/tests/manual-test.js https://your-backend.onrender.com "YOUR_TOKEN"
 ```
 
 ## Getting a Test Token
@@ -73,34 +36,42 @@ const { data, error } = await supabase.auth.signInWithPassword({
 const token = data.session.access_token;
 ```
 
-## What Tests Cover
+## What to Test Manually
 
-### Auth Middleware (`integration.test.ts`)
-- ✓ Reject missing/invalid tokens
-- ✓ Attach user role info from database
-- ✓ Handle auth errors gracefully
+When running the manual test suite, verify these features work:
+
+### Authentication
+- Request without token is rejected
+- Request with valid token succeeds
+- User role information is properly loaded
 
 ### Role-Based Access Control
-- ✓ Admins can delete (horses, medical records, etc.)
-- ✓ Editors can create/update (horses, medical records, etc.)
-- ✓ Viewers are read-only
-- ✓ Proper 403 Forbidden responses
+- Admins can delete (horses, medical records, etc.)
+- Editors can create/update (horses, medical records, etc.)
+- Viewers are read-only
+- Proper 403 Forbidden responses for unauthorized actions
+
+### Core Endpoints
+- **GET /ping** - Health check works
+- **GET /api/horses** - Retrieves horse list with auth
+- **POST /api/horses** - Creates new horse (editor+)
+- **GET /api/horses/:id** - Retrieves single horse with medical records
+- **POST /api/medical-records** - Creates medical record (editor+)
+- **PUT /api/medical-records/:id** - Updates medical record (editor+)
+- **DELETE /api/medical-records/:id** - Deletes record (admin only)
+- **GET /api/audit_logs** - Audit trail accessible to all authenticated users
+- **GET /api/users/me** - Current user profile
+- **GET /api/users** - List all users (admin only)
 
 ### Medical Records
-- ✓ CRUD operations
-- ✓ Uses `medical_records` table (not `documents`)
-- ✓ Stores `photo_url`, `updated_at`, `updated_by`
+- CRUD operations work
+- Photo URLs are stored and retrievable
+- `updated_at` and `updated_by` are tracked
 
 ### Audit Trail
-- ✓ Logs creation, updates, deletions
-- ✓ Tracks user_id and timestamp
-- ✓ All authenticated users can read
-
-### Error Handling
-- ✓ 404 on missing records
-- ✓ 500 on database errors (graceful)
-- ✓ 400 on invalid input
-- ✓ 401/403 on auth failures
+- Creation, updates, and deletions are logged
+- User ID and timestamp are recorded
+- Authenticated users can read logs
 
 ## Expected Results
 
@@ -128,34 +99,54 @@ If a test fails:
 4. **Permission denied**: Confirm user role is correct (`administrator`, `editor`, or `viewer`)
 5. **Timestamp issues**: Use `now()` for `created_at`, `updated_at` defaults
 
+## Pre-Deployment Testing
+
+Before deploying to Render, run:
+```bash
+node backend/tests/pre-deployment-test.js
+```
+
+This comprehensive test suite validates all endpoints and role-based access control with a live backend instance.
+
 ## CI/CD Integration
 
-For GitHub Actions, add `.github/workflows/test.yml`:
+For future automated testing with GitHub Actions, add `.github/workflows/test.yml`:
 ```yaml
-name: Backend Tests
+name: Backend Pre-Deployment Tests
 
 on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      supabase:
-        image: supabase/postgres:latest
-        env:
-          POSTGRES_PASSWORD: test
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cd backend && npm install && npm test
+      - run: cd backend && npm install
+      - run: npm run build  # Compile TypeScript
+      - run: node backend/tests/pre-deployment-test.js
 ```
+
+This will run the pre-deployment test suite on every push/PR.
 
 ## Next Steps
 
-After tests pass:
-1. Deploy backend to Render
-2. Update frontend `.env` with production API URL
-3. Run manual tests against Render URL
-4. Deploy to EAS for mobile builds
+1. **Local Testing**: Get a test token and run manual tests:
+   ```bash
+   node backend/tests/manual-test.js http://localhost:8000 "YOUR_TOKEN"
+   ```
+
+2. **Pre-Deployment**: Before pushing to GitHub:
+   ```bash
+   node backend/tests/pre-deployment-test.js
+   ```
+
+3. **Production Validation**: After deploying to Render:
+   ```bash
+   node backend/tests/manual-test.js https://your-backend.onrender.com "PROD_TOKEN"
+   ```

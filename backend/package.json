@@ -9,8 +9,7 @@
     "test:coverage": "jest --coverage",
     "dev": "tsx src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js",
-    "seed": "tsx src/seed.ts"
+    "start": "node dist/app.js"
   },
   "keywords": [],
   "author": "",
