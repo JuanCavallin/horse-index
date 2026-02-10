@@ -2,7 +2,7 @@
 
 https://horse-index.vercel.app/
 
-Android Download: https://docs.google.com/document/d/1nmjpuLZ2W0Hsb5QXmqqAC5Bi4LCZ_L8dKpzHxLuXFYo/edit?usp=sharing
+Android Download: [https://docs.google.com/document/d/1nmjpuLZ2W0Hsb5QXmqqAC5Bi4LCZ_L8dKpzHxLuXFYo/edit?usp=sharing](https://drive.google.com/file/d/1QncuzkG9kyZkCgdxcDAlwJg2oV7771Rz/view?usp=drivesdk)
 
 ### Get Started
 
