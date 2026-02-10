@@ -73,6 +73,7 @@ export default function HorseForm({
 }: HorseFormProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const placeholderTextColor = theme.mutedText;
   const styles = useMemo(() => getStyles(theme), [theme]);
 
   // Basic info
@@ -388,13 +389,32 @@ export default function HorseForm({
       <Text style={styles.sectionTitle}>{title}</Text>
 
       <Text style={styles.label}>Name *</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Thunderbolt" />
+      <TextInput
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+        placeholder="e.g. Thunderbolt"
+        placeholderTextColor={placeholderTextColor}
+      />
 
       <Text style={styles.label}>Breed *</Text>
-      <TextInput style={styles.input} value={breed} onChangeText={setBreed} placeholder="e.g. Quarter Horse" />
+      <TextInput
+        style={styles.input}
+        value={breed}
+        onChangeText={setBreed}
+        placeholder="e.g. Quarter Horse"
+        placeholderTextColor={placeholderTextColor}
+      />
 
       <Text style={styles.label}>Birth Year *</Text>
-      <TextInput style={styles.input} value={birthYear} onChangeText={setBirthYear} placeholder="e.g. 2003" keyboardType="numeric" />
+      <TextInput
+        style={styles.input}
+        value={birthYear}
+        onChangeText={setBirthYear}
+        placeholder="e.g. 2003"
+        keyboardType="numeric"
+        placeholderTextColor={placeholderTextColor}
+      />
 
       <Text style={styles.label}>Gender</Text>
       <View style={styles.chipRow}>
@@ -412,7 +432,13 @@ export default function HorseForm({
       </View>
 
       <Text style={styles.label}>Color *</Text>
-      <TextInput style={styles.input} value={color} onChangeText={setColor} placeholder="e.g. Bay" />
+      <TextInput
+        style={styles.input}
+        value={color}
+        onChangeText={setColor}
+        placeholder="e.g. Bay"
+        placeholderTextColor={placeholderTextColor}
+      />
       {/*}  
       <Text style={styles.label}>Health Status</Text>
       <View style={styles.chipRow}>
@@ -430,7 +456,13 @@ export default function HorseForm({
       </View>
         */}
       <Text style={styles.label}>Arrival Date (YYYY-MM-DD)</Text>
-      <TextInput style={styles.input} value={arrivalDate} onChangeText={setArrivalDate} placeholder="2025-01-15" />
+      <TextInput
+        style={styles.input}
+        value={arrivalDate}
+        onChangeText={setArrivalDate}
+        placeholder="2025-01-15"
+        placeholderTextColor={placeholderTextColor}
+      />
 
       <Text style={styles.label}>Photo</Text>
       {photoUri ? (
@@ -452,10 +484,22 @@ export default function HorseForm({
       )}
 
       <Text style={styles.label}>Pasture</Text>
-      <TextInput style={styles.input} value={pasture} onChangeText={setPasture} placeholder="e.g. North Field" />
+      <TextInput
+        style={styles.input}
+        value={pasture}
+        onChangeText={setPasture}
+        placeholder="e.g. North Field"
+        placeholderTextColor={placeholderTextColor}
+      />
 
       <Text style={styles.label}>Grooming Day</Text>
-      <TextInput style={styles.input} value={groomingDay} onChangeText={setGroomingDay} placeholder="e.g. Monday" />
+      <TextInput
+        style={styles.input}
+        value={groomingDay}
+        onChangeText={setGroomingDay}
+        placeholder="e.g. Monday"
+        placeholderTextColor={placeholderTextColor}
+      />
 
       {/* === Eye Conditions === */}
       <View style={styles.sectionDivider} />
@@ -524,6 +568,7 @@ export default function HorseForm({
         value={behaviorNotes}
         onChangeText={setBehaviorNotes}
         placeholder="Any behavioral notes..."
+        placeholderTextColor={placeholderTextColor}
         multiline
         numberOfLines={3}
       />
@@ -551,7 +596,13 @@ export default function HorseForm({
       {deceased && (
         <>
           <Text style={styles.label}>Date of Death (YYYY-MM-DD)</Text>
-          <TextInput style={styles.input} value={dateOfDeath} onChangeText={setDateOfDeath} placeholder="2025-01-15" />
+          <TextInput
+            style={styles.input}
+            value={dateOfDeath}
+            onChangeText={setDateOfDeath}
+            placeholder="2025-01-15"
+            placeholderTextColor={placeholderTextColor}
+          />
         </>
       )}
 
@@ -565,6 +616,7 @@ export default function HorseForm({
         value={medicalNotes}
         onChangeText={setMedicalNotes}
         placeholder="Any medical notes..."
+        placeholderTextColor={placeholderTextColor}
         multiline
         numberOfLines={4}
       />
@@ -627,6 +679,7 @@ export default function HorseForm({
               value={recDescription}
               onChangeText={setRecDescription}
               placeholder="Describe the record..."
+              placeholderTextColor={placeholderTextColor}
               multiline
             />
 
@@ -706,6 +759,7 @@ export default function HorseForm({
                   value={treatCustomType}
                   onChangeText={setTreatCustomType}
                   placeholder="Enter treatment type..."
+                  placeholderTextColor={placeholderTextColor}
                 />
               </>
             )}
@@ -716,6 +770,7 @@ export default function HorseForm({
               value={treatFrequency}
               onChangeText={setTreatFrequency}
               placeholder="e.g. Once daily, Twice weekly"
+              placeholderTextColor={placeholderTextColor}
             />
 
             <Text style={styles.label}>Notes</Text>
@@ -724,6 +779,7 @@ export default function HorseForm({
               value={treatNotes}
               onChangeText={setTreatNotes}
               placeholder="Additional notes..."
+              placeholderTextColor={placeholderTextColor}
               multiline
             />
 
