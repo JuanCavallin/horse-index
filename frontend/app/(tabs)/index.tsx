@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
   useColorScheme,
+  StatusBar,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -170,7 +171,6 @@ export default function HorseListScreen() {
   );
 
   return (
-    
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Mill Creek Farm</Text>
@@ -198,7 +198,7 @@ export default function HorseListScreen() {
           style={[styles.filterButton, selectedFilters.size > 0 && styles.filterButtonActive]}
           onPress={() => setShowFiltersModal(true)}
         >
-          <FontAwesome name="sliders" size={16} color={selectedFilters.size > 0 ? theme.onTint : theme.text} />
+          <FontAwesome name="sliders" size={16} color={theme.mutedText} />
           {selectedFilters.size > 0 && (
             <View style={styles.filterBadge}>
               <Text style={styles.filterBadgeText}>{selectedFilters.size}</Text>
@@ -361,7 +361,7 @@ export default function HorseListScreen() {
 
 const getStyles = (theme: typeof Colors.light) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.background },
+    container: { flex: 1, backgroundColor: theme.background, paddingTop: StatusBar.currentHeight || 0 },
     headerRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -394,7 +394,7 @@ const getStyles = (theme: typeof Colors.light) =>
       backgroundColor: theme.card,
       borderRadius: 12,
       paddingHorizontal: 12,
-      paddingVertical: 10,
+      paddingVertical: 2,
       borderWidth: 1,
       borderColor: theme.border,
     },
@@ -402,7 +402,7 @@ const getStyles = (theme: typeof Colors.light) =>
       flex: 1,
       marginHorizontal: 8,
       fontSize: 16,
-      color: theme.text,
+      color: theme.mutedText,
     },
     filterRow: {
       flexDirection: "row",
@@ -421,8 +421,8 @@ const getStyles = (theme: typeof Colors.light) =>
     filterText: { fontSize: 12, color: theme.mutedText, textTransform: "capitalize" },
     filterTextActive: { color: theme.onTint },
     filterButton: {
-      paddingHorizontal: 10,
-      paddingVertical: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 17,
       borderRadius: 8,
       backgroundColor: theme.card,
       borderWidth: 1,

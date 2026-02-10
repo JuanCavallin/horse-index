@@ -96,8 +96,9 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} /> 
-          <Stack.Screen name="horse/[id]" options={{ title: "Horse Details" }} />
-          <Stack.Screen name="horse/edit/[id]" options={{ title: "Edit Horse" }} />
+           <Stack.Screen name="archive" options={{ headerShown: false }} />
+           <Stack.Screen name="horse/[id]" options={{ headerShown: false }} />
+           <Stack.Screen name="horse/edit/[id]" options={{ headerShown: false }} />
         </Stack>
       </UserProvider>
     </ThemeProvider>

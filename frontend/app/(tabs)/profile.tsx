@@ -8,6 +8,7 @@ import {
   View,
   ActivityIndicator,
   useColorScheme,
+  StatusBar,
 } from "react-native";
 import { supabase } from "@/lib/supabase";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -236,12 +237,14 @@ const getStyles = (theme: typeof Colors.light) =>
     container: {
       flex: 1,
       backgroundColor: theme.background,
+      paddingTop: StatusBar.currentHeight || 0,
     },
     centerContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: theme.background,
+      paddingTop: StatusBar.currentHeight || 0,
     },
     header: {
       backgroundColor: theme.card,

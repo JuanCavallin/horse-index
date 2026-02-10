@@ -13,6 +13,7 @@ import {
   TextInput,
   View,
   useColorScheme,
+  StatusBar,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -352,7 +353,7 @@ export default function TasksScreen() {
 
 const getStyles = (theme: typeof Colors.light) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.background },
+    container: { flex: 1, backgroundColor: theme.background, paddingTop: StatusBar.currentHeight || 0 },
     headerRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -386,7 +387,7 @@ const getStyles = (theme: typeof Colors.light) =>
       backgroundColor: theme.card,
       borderRadius: 12,
       paddingHorizontal: 12,
-      paddingVertical: 10,
+      paddingVertical: 2,
       borderWidth: 1,
       borderColor: theme.border,
     },
@@ -394,7 +395,7 @@ const getStyles = (theme: typeof Colors.light) =>
       flex: 1,
       marginHorizontal: 8,
       fontSize: 16,
-      color: theme.text,
+      color: theme.mutedText,
     },
     loader: { marginTop: 40 },
     empty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 40 },

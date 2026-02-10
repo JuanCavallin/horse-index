@@ -3,7 +3,7 @@ import { horsesApi, medicalApi } from "@/lib/api";
 import { HorseFormData } from "@/lib/types";
 import HorseForm from "@/components/HorseForm";
 import { useUser } from "@/lib/UserContext";
-import { View, Text, useColorScheme } from "react-native";
+import { View, Text, useColorScheme, StatusBar } from "react-native";
 import Colors from "@/constants/Colors";
 
 export default function AddHorseScreen() {
@@ -15,7 +15,7 @@ export default function AddHorseScreen() {
   // Redirect if user doesn't have permission
   if (!loading && !canEdit) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20, paddingTop: StatusBar.currentHeight || 0 }}>
         <Text style={{ fontSize: 16, color: theme.text, textAlign: "center" }}>
           You don't have permission to add horses. Only editors and administrators can add horses.
         </Text>
@@ -34,5 +34,9 @@ export default function AddHorseScreen() {
     router.replace("/");
   };
 
-  return <HorseForm onSubmit={handleSubmit} submitLabel="Add Horse" />;
+  return (
+    <View style={{ flex: 1, paddingTop: StatusBar.currentHeight || 0, backgroundColor: theme.background }}>
+      <HorseForm onSubmit={handleSubmit} submitLabel="Add Horse" />
+    </View>
+  );
 }

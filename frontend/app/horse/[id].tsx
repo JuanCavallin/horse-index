@@ -12,6 +12,8 @@ import {
   Image,
   useColorScheme,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -256,10 +258,27 @@ export default function HorseDetailScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.name}>{horse.name}</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <FontAwesome
+              name="chevron-left"
+              size={18}
+              color={colorScheme === "dark" ? "#fff" : "#000"}
+            />
+            <Text
+              style={[
+                styles.backText,
+                { color: colorScheme === "dark" ? "#fff" : "#000" },
+              ]}
+            >
+              Back
+            </Text>
+          </Pressable>
+          <Text style={styles.name}>{horse.name}</Text>
+        </View>
 
       {horse.photo_url && (
         <View style={styles.photoContainer}>
@@ -519,6 +538,7 @@ export default function HorseDetailScreen() {
         )}
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -532,15 +552,24 @@ function DetailRow({ label, value, styles }: { label: string; value: string; sty
 }
 
 const getStyles = (theme: typeof Colors.light) => StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: theme.background },
   container: { flex: 1, backgroundColor: theme.background },
   content: { padding: 16, paddingBottom: 40 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-start",
     marginBottom: 16,
   },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 2,
+    marginBottom: 8,
+  },
+  backText: { fontSize: 14, fontWeight: "600" },
   name: { fontSize: 28, fontWeight: "800", color: theme.text },
   badge: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14 },
   badgeText: { color: theme.onTint, fontSize: 13, fontWeight: "600", textTransform: "capitalize" },

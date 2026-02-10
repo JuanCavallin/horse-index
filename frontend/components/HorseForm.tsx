@@ -36,6 +36,7 @@ interface HorseFormProps {
   initialValues?: Partial<HorseFormData>;
   onSubmit: (data: HorseFormData) => Promise<void>;
   submitLabel?: string;
+  title?: string;
 }
 
 function ToggleRow({
@@ -68,6 +69,7 @@ export default function HorseForm({
   initialValues,
   onSubmit,
   submitLabel = "Save",
+  title = "Add Horse",
 }: HorseFormProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -383,7 +385,7 @@ export default function HorseForm({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* === Basic Info === */}
-      <Text style={styles.sectionTitle}>Add Horse</Text>
+      <Text style={styles.sectionTitle}>{title}</Text>
 
       <Text style={styles.label}>Name *</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Thunderbolt" />
@@ -825,7 +827,7 @@ const getStyles = (theme: typeof Colors.light) =>
     photoButtonSecondaryText: { color: theme.text, fontSize: 14, fontWeight: "600" },
 
     // Sections
-    sectionTitle: { fontSize: 18, fontWeight: "700", color: theme.text, marginBottom: 4 },
+    sectionTitle: { fontSize: 20, fontWeight: "700", color: theme.text, marginBottom: 4 },
     sectionDivider: { borderTopWidth: 1, borderTopColor: theme.border, marginTop: 24, paddingTop: 16 },
 
     // Toggle rows

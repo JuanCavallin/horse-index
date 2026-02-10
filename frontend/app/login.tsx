@@ -1,6 +1,8 @@
 // frontend/app/login.tsx
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, useColorScheme, Platform, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { supabase } from '../lib/supabase'; // Make sure this path is correct
 import { useRouter } from 'expo-router';
 import Colors from "@/constants/Colors";
@@ -61,7 +63,8 @@ export default function Login() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <Text style={styles.header}>Horse Index Login</Text>
       <TextInput
         style={styles.input}
@@ -86,7 +89,7 @@ export default function Login() {
       <Pressable style={styles.signUpButton} disabled={loading} onPress={signUpWithEmail}>
         <Text style={styles.signUpText}>Sign Up</Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 

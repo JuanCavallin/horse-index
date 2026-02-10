@@ -7,6 +7,7 @@ import {
   Text,
   View,
   useColorScheme,
+  StatusBar,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { auditApi } from "@/lib/api";
@@ -134,7 +135,8 @@ export default function AuditLogListScreen() {
 
 const getStyles = (theme: typeof Colors.light) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.background },
+    container: { flex: 1, backgroundColor: theme.background, paddingTop: StatusBar.currentHeight || 0 },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
 
     headerRow: {
       paddingHorizontal: 12,
@@ -144,7 +146,7 @@ const getStyles = (theme: typeof Colors.light) =>
       alignItems: "center",
       justifyContent: "space-between",
     },
-    title: { fontSize: 18, fontWeight: "700", color: theme.text },
+    title: { fontSize: 20, fontWeight: "700", color: theme.text },
     refreshBtn: {
       backgroundColor: theme.tint,
       paddingHorizontal: 12,
