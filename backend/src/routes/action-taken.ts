@@ -1,7 +1,8 @@
-import { Router } from "express";
+import { Router, Response } from "express";
+import { AuthRequest } from "../middleware/auth";
 const router = Router();
 
-router.get("/", (req, res) => {
+router.get("/", (req: AuthRequest, res: Response) => {
   res.json({ message: "Action Taken endpoint works" });
 });
 

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { supabase, supabaseAdmin } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
@@ -6,7 +6,7 @@ import { logChanges, logCreation, logDeletion } from "../lib/audit";
 const router = Router();
 
 // GET /api/medical-records/horse/:id  — all records for a horse
-router.get("/horse/:id", authenticateToken, async (req, res) => {
+router.get("/horse/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -25,7 +25,7 @@ router.get("/horse/:id", authenticateToken, async (req, res) => {
 });
 
 // GET /api/medical-records/:id  — single record
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -50,7 +50,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/medical-records  — create a record
-router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { horse_id, description, photoBase64, photoFileName } = req.body;
 
@@ -111,7 +111,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 });
 
 // PUT /api/medical-records/:id  — update a record
-router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -160,7 +160,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/medical-records/:id  — delete a record (editor or admin only)
-router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

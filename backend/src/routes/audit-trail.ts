@@ -1,11 +1,11 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { supabase } from "../lib/supabase";
-import { authenticateToken } from "../middleware/auth";
+import { authenticateToken, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
 // GET /api/audit_logs  — list all audit logs
-router.get("/", authenticateToken, async (_req, res) => {
+router.get("/", authenticateToken, async (_req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from("audit_trail")
@@ -21,7 +21,7 @@ router.get("/", authenticateToken, async (_req, res) => {
 });
 
 // GET /api/audit_logs/:id  — single audit log
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -46,7 +46,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/audit_logs  — create an audit log entry
-router.post("/", async (req, res) => {
+router.post("/", async (req: AuthRequest, res: Response) => {
   try {
     const { user_id, table_name, field_name, before_value, after_value } = req.body;
 

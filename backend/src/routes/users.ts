@@ -1,11 +1,11 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { supabase } from "../lib/supabase";
 import { authenticateToken, requireAdmin, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
 // GET /api/users/me - Get current user's profile and role
-router.get("/me", authenticateToken, async (req: AuthRequest, res) => {
+router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Not authenticated" });
@@ -26,7 +26,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // GET /api/users - List all users (admin only)
-router.get("/", authenticateToken, requireAdmin, async (req, res) => {
+router.get("/", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from("users")
@@ -42,7 +42,7 @@ router.get("/", authenticateToken, requireAdmin, async (req, res) => {
 });
 
 // PUT /api/users/:id - Update user role (admin only)
-router.put("/:id", authenticateToken, requireAdmin, async (req, res) => {
+router.put("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { role, name, phone, active_user } = req.body;

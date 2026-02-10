@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { supabase } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
@@ -6,7 +6,7 @@ import { logChanges, logCreation, logDeletion } from "../lib/audit";
 const router = Router();
 
 // GET /api/daily-observations — list all tasks, joined with horse name
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from("daily_observations")
@@ -29,7 +29,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 // GET /api/daily-observations/horse/:id — tasks for a specific horse
-router.get("/horse/:id", authenticateToken, async (req, res) => {
+router.get("/horse/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -48,7 +48,7 @@ router.get("/horse/:id", authenticateToken, async (req, res) => {
 });
 
 // GET /api/daily-observations/:id — single task
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -73,7 +73,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/daily-observations — create a task
-router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { horse_id, notes, todo_status, done_status, notify_staff } = req.body;
 
@@ -112,7 +112,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 });
 
 // PUT /api/daily-observations/:id — update a task
-router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -160,7 +160,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/daily-observations/:id — delete a task
-router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

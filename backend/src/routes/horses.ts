@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { supabase, supabaseAdmin } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
@@ -6,7 +6,7 @@ import { logChanges, logCreation, logDeletion } from "../lib/audit";
 const router = Router();
 
 // GET /api/horses  — list all horses, optional ?health_status= filter
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     let query = supabase.from("horses").select("*").order("name");
 
@@ -25,7 +25,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 // GET /api/horses/:id  — single horse with medical_records
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -85,7 +85,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/horses  — create a horse (optionally with inline medical records and image)
-router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { new_medical_records, new_treatments, photoBase64, photoFileName, ...horseData } = req.body;
 
@@ -236,7 +236,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 });
 
 // PUT /api/horses/:id  — update a horse
-router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { photoBase64, photoFileName, ...updateBody } = req.body;
@@ -313,7 +313,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/horses/:id  — delete a horse (editor or admin only)
-router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

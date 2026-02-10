@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { supabase } from "../lib/supabase";
 import { authenticateToken, requireEditor, requireAdmin, AuthRequest } from "../middleware/auth";
 import { logChanges, logCreation, logDeletion } from "../lib/audit";
@@ -28,7 +28,7 @@ async function getFlattenedRecord(actionTakenId: string | number) {
 }
 
 // GET /api/treatments/horse/:id — all treatments for a horse
-router.get("/horse/:id", authenticateToken, async (req, res) => {
+router.get("/horse/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -61,7 +61,7 @@ router.get("/horse/:id", authenticateToken, async (req, res) => {
 });
 
 // GET /api/treatments/:id — single treatment
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const record = await getFlattenedRecord(req.params.id as string);
     if (!record) {
@@ -75,7 +75,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // POST /api/treatments — create a treatment for a horse
-router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const { horse_id, type, frequency, notes } = req.body;
 
@@ -125,7 +125,7 @@ router.post("/", authenticateToken, requireEditor, async (req: AuthRequest, res)
 });
 
 // PUT /api/treatments/:id — update a treatment (by action_taken id)
-router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res) => {
+router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, res: Response) => {
   try {
     const id = String(req.params.id);
     const { type, frequency, notes } = req.body;
@@ -182,7 +182,7 @@ router.put("/:id", authenticateToken, requireEditor, async (req: AuthRequest, re
 });
 
 // DELETE /api/treatments/:id — delete a treatment (by action_taken id)
-router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const id = String(req.params.id);
 
